@@ -2,6 +2,7 @@ package com.mikedaguillo.redditunderground2.utility;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -21,21 +22,34 @@ import java.util.Set;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLPeerUnverifiedException;
 
-public class ConnectionManager {
-    private static String RedditConnectionString = "http://www.reddit.com/api/login/{username}";
+public final class ConnectionManager {
 
-    public static String GetConnectionUrl()
+    private static final String TAG = "ConnectionManager";
+
+    public ConnectionManager() { }
+
+    /**
+     * Replaces the connection string skeleton with the desired username to login to
+     * @param username
+     * @return A connection url with
+     */
+    public static String GetConnectionUrl(String username) { return RedditAPI.REDDIT_CONNECTION_STRING.replace("{username}", username); }
+
+    /**
+     * Attempts to login to reddit
+     * @param username
+     * @param password
+     * @return
+     * @throws IOException
+     */
+    public static String LoginToReddit(String username, String password) throws IOException
     {
-        String userPermissionUrl = RedditConnectionString.replace("{username}", "BetaRhoOmega");
-        return userPermissionUrl;
-    }
-
-    public static String ConnectToReddit(String connectionUrl, String userName, String password) throws IOException {
-        OutputStream outputStream = null;
+        OutputStream outputStream;
         InputStream inputStream = null;
 
-        try
-        {
+        try {
+            // Set up the connection url
+            String connectionUrl = GetConnectionUrl(username);
             URL url = new URL(connectionUrl);
             HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
             connection.setReadTimeout(10000);
@@ -46,11 +60,11 @@ public class ConnectionManager {
             // Write post params
             Hashtable<String, String> postParams = new Hashtable<>();
             postParams.put("api_type", "json");
-            postParams.put("user", userName);
+            postParams.put("user", username);
             postParams.put("passwd", password);
-
             String postParamsString = WritePostParams(postParams);
 
+            // Write to the output stream
             outputStream = connection.getOutputStream();
             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream, "UTF-8"));
             writer.write(postParamsString);
@@ -58,9 +72,10 @@ public class ConnectionManager {
             writer.close();
             outputStream.close();
 
-            // Connect to reddit
+            // Perform the login
             connection.connect();
 
+            // Now read the results from reddit
             inputStream = connection.getInputStream();
             StringBuilder sb = new StringBuilder();
             BufferedReader rd = new BufferedReader(new InputStreamReader(inputStream));
@@ -70,18 +85,23 @@ public class ConnectionManager {
             }
 
             return sb.toString();
+        } catch (IOException e) {
+            e.printStackTrace();
+            Log.e(TAG, "Error occurred attempting to login to reddit.", e);
+
+            return "Unable to connect to reddit";
         }
-        catch (Exception ex)
-        {
-            return "Error occurred while connecting";
-        }
-        finally
-        {
+        finally {
             if (inputStream != null)
                 inputStream.close();
         }
     }
 
+    /**
+     * Converts a hashtable of key value pairs to an ampersand separated string post params
+     * @param postParams
+     * @return Ampersand separated string of post params
+     */
     private static String WritePostParams(Hashtable<String, String> postParams)
     {
         StringBuilder postParamStringBuilder = new StringBuilder();
@@ -99,4 +119,10 @@ public class ConnectionManager {
 
         return postParamStringBuilder.toString();
     }
+
+    private static class RedditAPI {
+        // Connection string skeleton
+        public static String REDDIT_CONNECTION_STRING = "https://www.reddit.com/api/login/{username}";
+    }
+
 }

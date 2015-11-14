@@ -2,4 +2,17 @@
     <string name="app_name">RedditUnderground2</string>
     <string name="title_activity_main_screen">MainScreen</string>
     <string name="hello_world_text">Hello World!</string>
+    <string name="title_activity_login_screen">Login to Reddit</string>
+
+    <!-- Strings related to login -->
+    <string name="prompt_username">Username</string>
+    <string name="prompt_password">Password</string>
+    <string name="action_sign_in">Login to reddit</string>
+    <string name="action_sign_in_short">Login</string>
+    <string name="error_incorrect_password">This password is incorrect for this account</string>
+    <string name="error_field_required">This field is required</string>
+
+    <!-- Strings related to app settings -->
+    <string name="LoginState">LoginState</string>
+    <string name="CurrentUser">CurrentUser</string>
 </resources>
