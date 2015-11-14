@@ -18,8 +18,11 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
 import com.mikedaguillo.redditunderground2.utility.ApplicationManager;
 import com.mikedaguillo.redditunderground2.utility.ConnectionManager;
+
+import org.json.JSONObject;
 
 import java.io.IOException;
 
@@ -182,11 +185,48 @@ public class LoginScreen extends AppCompatActivity {
                 String redditReturnValues = ConnectionManager.LoginToReddit(mUsername, mPassword);
                 Log.d(TAG, "Reddit return values: " + redditReturnValues);
 
-                // Succesfully logged in, save state to appSettings
-                SharedPreferences.Editor editor = appSettings.edit();
-                editor.putBoolean(getString(R.string.LoginState), true);
-                editor.putString(getString(R.string.CurrentUser), mUsername);
-                editor.commit();
+                // Lets convert the string to a json object
+                Gson gson = new Gson();
+                ConnectionManager.RedditLoginJSON redditReturnJSON = gson.fromJson(redditReturnValues, ConnectionManager.RedditLoginJSON.class);
+
+                // Check if we got a valid response
+                if (redditReturnJSON == null)
+                {
+                    Log.e(TAG, "Error while logging in. The return string could not be converted to a json object");
+                    return false;
+                }
+
+                // Check if we got any errors
+                if (redditReturnJSON.json.errors.length > 0)
+                {
+                    Log.e(TAG, "Error while logging in: " + redditReturnJSON.json.errors.toString());
+                    return false;
+                }
+
+                // Check the return data
+                if (redditReturnJSON.json.data != null)
+                {
+                    // Check to make sure we got a session cookie
+                    if (redditReturnJSON.json.data.cookie != null && !redditReturnJSON.json.data.cookie.equals(""))
+                    {
+                        // No errors, store user login data in the shared preferences
+                        SharedPreferences.Editor editor = appSettings.edit();
+                        editor.putBoolean(getString(R.string.LoginState), true);
+                        editor.putString(getString(R.string.CurrentUser), mUsername);
+                        editor.putString(getString(R.string.SessionCookie), redditReturnJSON.json.data.cookie);
+                        editor.commit();
+                    }
+                    else
+                    {   // No session cookie
+                        Log.e(TAG, "No session cookie retrieved");
+                        return false;
+                    }
+                }
+                else
+                {   // No data returned
+                    Log.e(TAG, "No data returned from reddit");
+                    return false;
+                }
 
             } catch (IOException e) {
                 Log.e(TAG, "An error occurred while attempting to login to reddit: ", e);

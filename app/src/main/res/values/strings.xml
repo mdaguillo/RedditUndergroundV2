@@ -15,4 +15,5 @@
     <!-- Strings related to app settings -->
     <string name="LoginState">LoginState</string>
     <string name="CurrentUser">CurrentUser</string>
+    <string name="SessionCookie">SessionCookie</string>
 </resources>

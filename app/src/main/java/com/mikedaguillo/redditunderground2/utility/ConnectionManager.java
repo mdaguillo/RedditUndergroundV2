@@ -137,4 +137,21 @@ public final class ConnectionManager {
         // Connection string skeleton
         public static String REDDIT_CONNECTION_STRING = "https://www.reddit.com/api/login/{username}";
     }
+
+    public static class RedditLoginJSON {
+        public RedditLoginJSON() {}
+
+        public JsonObject json;
+
+        public class JsonObject {
+            public String[] errors;
+            public DataObject data;
+        }
+
+        public class DataObject {
+            public Boolean need_https;
+            public String modhash;
+            public String cookie;
+        }
+    }
 }
