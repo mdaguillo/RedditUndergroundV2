@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">RedditUnderground2</string>
+    <string name="title_activity_main_screen">MainScreen</string>
+    <string name="hello_world_text">Hello World!</string>
+</resources>
