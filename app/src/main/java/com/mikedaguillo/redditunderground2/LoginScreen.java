@@ -16,7 +16,9 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
+import com.mikedaguillo.redditunderground2.utility.ApplicationManager;
 import com.mikedaguillo.redditunderground2.utility.ConnectionManager;
 
 import java.io.IOException;
@@ -53,6 +55,7 @@ public class LoginScreen extends AppCompatActivity {
         mRedditLoginButon.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
+                ApplicationManager.HideKeyboard(LoginScreen.this, view);
                 attemptLogin();
             }
         });
@@ -85,6 +88,13 @@ public class LoginScreen extends AppCompatActivity {
 
         boolean cancel = false;
         View focusView = null;
+
+        // Check network connection
+        if (!ConnectionManager.IsConnectedToNetwork(this))
+        {
+            Toast.makeText(LoginScreen.this, "You must be connected to the internet in order to login to reddit.", Toast.LENGTH_LONG).show();
+            return;
+        }
 
         // Check for a valid password
         if (TextUtils.isEmpty(password)) {

@@ -1,6 +1,10 @@
 package com.mikedaguillo.redditunderground2.utility;
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.util.Log;
 
@@ -120,9 +124,17 @@ public final class ConnectionManager {
         return postParamStringBuilder.toString();
     }
 
+
+   public static boolean IsConnectedToNetwork(Activity activity) {
+       ConnectivityManager cm = (ConnectivityManager) activity.getSystemService(Context.CONNECTIVITY_SERVICE);
+       NetworkInfo info = cm.getActiveNetworkInfo();
+       if (info == null) return false;
+       NetworkInfo.State network = info.getState();
+       return (network == NetworkInfo.State.CONNECTED);
+   }
+
     private static class RedditAPI {
         // Connection string skeleton
         public static String REDDIT_CONNECTION_STRING = "https://www.reddit.com/api/login/{username}";
     }
-
 }
