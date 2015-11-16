@@ -6,6 +6,7 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -19,6 +20,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
+import com.mikedaguillo.redditunderground2.data.RedditDatabaseHelper;
 import com.mikedaguillo.redditunderground2.utility.ApplicationManager;
 import com.mikedaguillo.redditunderground2.utility.ConnectionManager;
 
@@ -179,15 +181,11 @@ public class LoginScreen extends AppCompatActivity {
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            // TODO: attempt authentication against a network service.
+            SQLiteDatabase db = null;
 
             try {
-                String redditReturnValues = ConnectionManager.LoginToReddit(mUsername, mPassword);
-                Log.d(TAG, "Reddit return values: " + redditReturnValues);
-
-                // Lets convert the string to a json object
-                Gson gson = new Gson();
-                ConnectionManager.RedditLoginJSON redditReturnJSON = gson.fromJson(redditReturnValues, ConnectionManager.RedditLoginJSON.class);
+                // Try and login
+                ConnectionManager.RedditLoginJSON redditReturnJSON = ConnectionManager.LoginToReddit(mUsername, mPassword);
 
                 // Check if we got a valid response
                 if (redditReturnJSON == null)
@@ -204,33 +202,64 @@ public class LoginScreen extends AppCompatActivity {
                 }
 
                 // Check the return data
-                if (redditReturnJSON.json.data != null)
-                {
-                    // Check to make sure we got a session cookie
-                    if (redditReturnJSON.json.data.cookie != null && !redditReturnJSON.json.data.cookie.equals(""))
-                    {
-                        // No errors, store user login data in the shared preferences
-                        SharedPreferences.Editor editor = appSettings.edit();
-                        editor.putBoolean(getString(R.string.LoginState), true);
-                        editor.putString(getString(R.string.CurrentUser), mUsername);
-                        editor.putString(getString(R.string.SessionCookie), redditReturnJSON.json.data.cookie);
-                        editor.commit();
-                    }
-                    else
-                    {   // No session cookie
-                        Log.e(TAG, "No session cookie retrieved");
-                        return false;
-                    }
-                }
-                else
+                if (redditReturnJSON.json.data == null)
                 {   // No data returned
                     Log.e(TAG, "No data returned from reddit");
                     return false;
                 }
 
+                // Check to make sure we got a session cookie
+                if (redditReturnJSON.json.data.cookie == null || redditReturnJSON.json.data.cookie.equals(""))
+                {   // No session cookie
+                    Log.e(TAG, "No session cookie retrieved");
+                    return false;
+                }
+
+                // No errors, store user login data in the shared preferences
+                SharedPreferences.Editor editor = appSettings.edit();
+                editor.putBoolean(getString(R.string.LoginState), true);
+                editor.putString(getString(R.string.CurrentUser), mUsername);
+                editor.putString(getString(R.string.SessionCookie), redditReturnJSON.json.data.cookie);
+                editor.commit();
+
+                // Now lets try and retrieve the user's subreddits
+                ConnectionManager.RedditSubredditsJSON subscribedSubreddits = ConnectionManager.GetCurrentUsersSubscribedSubreddits(mUsername, redditReturnJSON.json.data.cookie);
+
+                if (subscribedSubreddits == null)
+                {
+                    Log.e(TAG, "Subscribed subreddits object is null");
+                    return false;
+                }
+
+                // Retrieve the database helper and a writeable database
+                RedditDatabaseHelper helper = new RedditDatabaseHelper(getApplicationContext());
+                db = helper.getWritableDatabase();
+
+                if (subscribedSubreddits.data == null || subscribedSubreddits.data.children == null)
+                {
+                    Log.e(TAG, "Subscribed subreddits object has no data object or children object");
+                    return false;
+                }
+
+                // Loop through the returned data and insert into the db
+                for (int i = 0; i < subscribedSubreddits.data.children.length; i++)
+                {
+                    ConnectionManager.RedditSubredditsJSON.SubredditDataObject subredditData = subscribedSubreddits.data.children[i].data;
+                    helper.InsertIgnoreSubredditRow(
+                            db,
+                            subredditData.id,
+                            subredditData.display_name,
+                            subredditData.url,
+                            mUsername
+                    );
+                }
             } catch (IOException e) {
                 Log.e(TAG, "An error occurred while attempting to login to reddit: ", e);
                 return false;
+            }
+            finally {
+                if (db != null)
+                    db.close();
             }
 
             return true;

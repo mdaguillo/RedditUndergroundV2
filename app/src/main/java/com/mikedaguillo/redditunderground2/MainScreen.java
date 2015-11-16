@@ -20,7 +20,7 @@ public class MainScreen extends AppCompatActivity {
     private TextView currentUserLabel;
     private SharedPreferences appSettings;
     private final String[] loggedOutMenuValues = new String[] { "Login to reddit" };
-    private final String[] loggedInMenuValues = new String[] { "View My Subreddits", "Logout" };
+    private final String[] loggedInMenuValues = new String[] { "Download from my subreddits", "Logout" };
     private String[] displayValues;
 
     @Override
@@ -63,6 +63,9 @@ public class MainScreen extends AppCompatActivity {
                 {
                     case "Login to reddit":
                         sendUserToActivity(LoginScreen.class);
+                        break;
+                    case "Download from my subreddits":
+                        sendUserToActivity(DownloadSubreddits.class);
                         break;
                     case "Logout":
                         ApplicationManager.CreateAndShowAlertDialog(MainScreen.this, "Logout of Reddit", "Are you sure you want to logout?", "Logout", "Cancel", new ApplicationManager.DialogCallback() {

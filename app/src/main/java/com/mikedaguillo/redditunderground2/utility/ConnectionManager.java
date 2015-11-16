@@ -2,11 +2,11 @@ package com.mikedaguillo.redditunderground2.utility;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.Uri;
 import android.util.Log;
+
+import com.google.gson.Gson;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -15,16 +15,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.io.Reader;
 import java.net.URL;
-import java.security.cert.Certificate;
 import java.util.Hashtable;
-import java.util.List;
-import java.util.Random;
 import java.util.Set;
 
 import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLPeerUnverifiedException;
 
 public final class ConnectionManager {
 
@@ -37,7 +32,7 @@ public final class ConnectionManager {
      * @param username
      * @return A connection url with
      */
-    public static String GetConnectionUrl(String username) { return RedditAPI.REDDIT_CONNECTION_STRING.replace("{username}", username); }
+    public static String GetConnectionUrl(String username) { return RedditAPI.REDDIT_LOGIN_STRING.replace("{username}", username); }
 
     /**
      * Attempts to login to reddit
@@ -46,7 +41,7 @@ public final class ConnectionManager {
      * @return
      * @throws IOException
      */
-    public static String LoginToReddit(String username, String password) throws IOException
+    public static RedditLoginJSON LoginToReddit(String username, String password) throws IOException
     {
         OutputStream outputStream;
         InputStream inputStream = null;
@@ -84,18 +79,66 @@ public final class ConnectionManager {
             StringBuilder sb = new StringBuilder();
             BufferedReader rd = new BufferedReader(new InputStreamReader(inputStream));
             String line;
-            while ((line = rd.readLine()) != null) {
+            while ((line = rd.readLine()) != null)
                 sb.append(line);
-            }
 
-            return sb.toString();
+            String redditReturnValues = sb.toString();
+            Log.d(TAG, "Reddit return values: " + redditReturnValues);
+
+            // Lets convert the string to a json object
+            Gson gson = new Gson();
+            ConnectionManager.RedditLoginJSON redditReturnJSON = gson.fromJson(redditReturnValues, ConnectionManager.RedditLoginJSON.class);
+
+            return redditReturnJSON;
         } catch (IOException e) {
             e.printStackTrace();
             Log.e(TAG, "Error occurred attempting to login to reddit.", e);
 
-            return "Unable to connect to reddit";
+            return null;
         }
         finally {
+            if (inputStream != null)
+                inputStream.close();
+        }
+    }
+
+    public static RedditSubredditsJSON GetCurrentUsersSubscribedSubreddits (String currentUser, String sessionCookie) throws IOException
+    {
+        InputStream inputStream = null;
+        try {
+            // Construct subreddits url
+            URL connectionUrl = new URL(RedditAPI.REDDIT_GET_SUBSCRIBED_SUBREDDITS_STRING);
+            HttpsURLConnection connection = (HttpsURLConnection) connectionUrl.openConnection();
+            connection.setReadTimeout(10000);
+            connection.setConnectTimeout(15000);
+            connection.setRequestMethod("GET");
+            connection.setRequestProperty("Cookie", "reddit_session=" + sessionCookie + "; secure_session=1");
+
+            // Connect
+            connection.connect();
+
+            // Read the results
+            inputStream = connection.getInputStream();
+            StringBuilder sb = new StringBuilder();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+            String line;
+            while ((line = reader.readLine()) != null)
+                sb.append(line);
+
+            String returnValues = sb.toString();
+            Log.d(TAG, "Subreddits return values: " + returnValues);
+
+            Gson gson = new Gson();
+            RedditSubredditsJSON subredditsJSON = gson.fromJson(returnValues, RedditSubredditsJSON.class);
+            return subredditsJSON;
+        }
+        catch (IOException e)
+        {
+            Log.e(TAG, "Error occurred while attempting to retrieve user subreddits.", e);
+            return null;
+        }
+        finally
+        {
             if (inputStream != null)
                 inputStream.close();
         }
@@ -135,7 +178,8 @@ public final class ConnectionManager {
 
     private static class RedditAPI {
         // Connection string skeleton
-        public static String REDDIT_CONNECTION_STRING = "https://www.reddit.com/api/login/{username}";
+        public static String REDDIT_LOGIN_STRING = "https://www.reddit.com/api/login/{username}";
+        public static String REDDIT_GET_SUBSCRIBED_SUBREDDITS_STRING = "https://www.reddit.com/subreddits/mine/subscriber.json";
     }
 
     public static class RedditLoginJSON {
@@ -144,7 +188,7 @@ public final class ConnectionManager {
         public JsonObject json;
 
         public class JsonObject {
-            public String[] errors;
+            public String[][] errors;
             public DataObject data;
         }
 
@@ -152,6 +196,29 @@ public final class ConnectionManager {
             public Boolean need_https;
             public String modhash;
             public String cookie;
+        }
+    }
+
+    public static class RedditSubredditsJSON {
+        public RedditSubredditsJSON() {}
+
+        public String kind;
+        public DataObject data;
+
+        public class DataObject {
+            public String modhash;
+            public SubredditObject[] children;
+        }
+
+        public class SubredditObject {
+            public String kind;
+            public SubredditDataObject data;
+        }
+
+        public class SubredditDataObject {
+            public String id;
+            public String display_name;
+            public String url;
         }
     }
 }
