@@ -29,9 +29,11 @@
         </activity>
         <activity
             android:name=".LoginScreen"
-            android:label="@string/title_activity_login_screen" >
+            android:label="@string/title_activity_login_screen"
+            android:theme="@style/AppTheme.NoActionBar" >
         </activity>
-        <activity android:name=".DownloadSubreddits" >
+        <activity android:name=".CacheSubreddits"
+            android:theme="@style/AppTheme.NoActionBar" >
         </activity>
     </application>
 

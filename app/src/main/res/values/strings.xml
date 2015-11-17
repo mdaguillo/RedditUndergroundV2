@@ -12,6 +12,9 @@
     <string name="error_incorrect_password">This password is incorrect for this account</string>
     <string name="error_field_required">This field is required</string>
 
+    <!-- String related to the subscribed subreddits screen -->
+    <string name="cache_button">Cache Subreddits</string>
+
     <!-- Strings related to app settings -->
     <string name="LoginState">LoginState</string>
     <string name="CurrentUser">CurrentUser</string>

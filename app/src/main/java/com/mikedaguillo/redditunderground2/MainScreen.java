@@ -1,7 +1,5 @@
 package com.mikedaguillo.redditunderground2;
 
-import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -65,7 +63,7 @@ public class MainScreen extends AppCompatActivity {
                         sendUserToActivity(LoginScreen.class);
                         break;
                     case "Download from my subreddits":
-                        sendUserToActivity(DownloadSubreddits.class);
+                        sendUserToActivity(CacheSubreddits.class);
                         break;
                     case "Logout":
                         ApplicationManager.CreateAndShowAlertDialog(MainScreen.this, "Logout of Reddit", "Are you sure you want to logout?", "Logout", "Cancel", new ApplicationManager.DialogCallback() {
