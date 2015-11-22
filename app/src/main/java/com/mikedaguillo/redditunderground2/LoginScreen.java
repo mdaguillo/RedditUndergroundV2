@@ -223,7 +223,7 @@ public class LoginScreen extends AppCompatActivity {
                 editor.commit();
 
                 // Now lets try and retrieve the user's subreddits
-                ConnectionManager.RedditSubredditsJSON subscribedSubreddits = ConnectionManager.GetCurrentUsersSubscribedSubreddits(mUsername, redditReturnJSON.json.data.cookie);
+                ConnectionManager.RedditSubredditsJSON subscribedSubreddits = ConnectionManager.GetCurrentUsersSubscribedSubreddits(redditReturnJSON.json.data.cookie);
 
                 if (subscribedSubreddits == null)
                 {

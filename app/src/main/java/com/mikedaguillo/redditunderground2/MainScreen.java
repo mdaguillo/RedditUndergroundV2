@@ -63,7 +63,7 @@ public class MainScreen extends AppCompatActivity {
                         sendUserToActivity(LoginScreen.class);
                         break;
                     case "Download from my subreddits":
-                        sendUserToActivity(CacheSubreddits.class);
+                        sendUserToActivity(CacheSubredditsScreen.class);
                         break;
                     case "Logout":
                         ApplicationManager.CreateAndShowAlertDialog(MainScreen.this, "Logout of Reddit", "Are you sure you want to logout?", "Logout", "Cancel", new ApplicationManager.DialogCallback() {
@@ -73,6 +73,7 @@ public class MainScreen extends AppCompatActivity {
                                 SharedPreferences.Editor editor = appSettings.edit();
                                 editor.remove(getString(R.string.LoginState));
                                 editor.remove(getString(R.string.CurrentUser));
+                                editor.remove(getString(R.string.SessionCookie));
                                 editor.commit();
 
                                 // Now refresh the current screen
