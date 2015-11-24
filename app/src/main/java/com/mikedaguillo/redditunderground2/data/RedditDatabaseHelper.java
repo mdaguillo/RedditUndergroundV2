@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import java.util.HashMap;
 
@@ -14,6 +15,7 @@ import java.util.HashMap;
 public class RedditDatabaseHelper extends SQLiteOpenHelper {
     public static final int DATABASE_VERSION = 1;
     public static final String DATABASE_NAME = "RedditUnderground.db";
+    private static final String TAG = "RedditDatabaseHelper";
 
     public RedditDatabaseHelper(Context context)
     {
@@ -63,5 +65,27 @@ public class RedditDatabaseHelper extends SQLiteOpenHelper {
         values.put(RedditDatabaseContract.RedditPost.COLUMN_NAME_IS_SELF, ((boolean) rowValues.get(RedditDatabaseContract.RedditPost.COLUMN_NAME_IS_SELF)) ? 1 : 0);
 
         return database.insertWithOnConflict(RedditDatabaseContract.RedditPost.TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_IGNORE);
+    }
+
+    public boolean DeleteAllDataInDatabase(SQLiteDatabase database)
+    {
+        // Sqlite does not have a truncate command so we need to drop any tables and then recreate them
+        try
+        {
+            // Delete
+            database.execSQL(RedditDatabaseContract.SQL_DELETE_TABLE_SUBREDDIT);
+            database.execSQL(RedditDatabaseContract.SQL_DELETE_TABLE_REDDITPOST);
+
+            // Recreate
+            database.execSQL(RedditDatabaseContract.SQL_CREATE_TABLE_SUBREDDIT);
+            database.execSQL(RedditDatabaseContract.SQL_CREATE_TABLE_REDDITPOST);
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Log.e(TAG, "Error occurred attempting to delete data from database.", ex);
+            return false;
+        }
     }
 }

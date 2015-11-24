@@ -19,6 +19,8 @@ import android.widget.Toast;
 
 import com.mikedaguillo.redditunderground2.data.RedditDatabaseContract;
 import com.mikedaguillo.redditunderground2.data.RedditDatabaseHelper;
+import com.mikedaguillo.redditunderground2.data.api.json.RedditListing;
+import com.mikedaguillo.redditunderground2.data.api.json.RedditPost;
 import com.mikedaguillo.redditunderground2.utility.ConnectionManager;
 
 import java.io.IOException;
@@ -130,7 +132,7 @@ public class CacheSubredditsScreen extends AppCompatActivity {
     }
 
     // Async class designed to cache subreddit data from reddit
-    private class CacheSubredditData extends AsyncTask<Void, Void, Void>
+    private class CacheSubredditData extends AsyncTask<Void, ProgressUpdates, Void>
     {
         private final String TAG = "CacheSubredditData";
         private ArrayList<String> _subredditsToCache;
@@ -162,15 +164,66 @@ public class CacheSubredditsScreen extends AppCompatActivity {
             SQLiteDatabase db = null;
             try
             {
+                // Create the database objects we'll need
                 RedditDatabaseHelper dbHelper = new RedditDatabaseHelper(getApplicationContext());
                 db = dbHelper.getWritableDatabase();
 
+                // Create the object we'll use to update the progress dialog
+                ProgressUpdates progressUpdates = new ProgressUpdates();
+                progressUpdates.UpdatePercent = 0;
+
                 // Loop through the selected subreddits and download listing info from reddit
-                for (String subreddit : _subredditsToCache)
+                for (int i = 0; i < _subredditsToCache.size(); i++)
                 {
+                    String subreddit = _subredditsToCache.get(i);
+                    progressUpdates.UpdateMessage = "Locally caching posts for subreddit: " + subreddit;
+                    publishProgress(progressUpdates);
+
                     String subredditId = _subredditIds.get(subreddit);
-                    if (!ConnectionManager.CacheSubreddit(subreddit, subredditId, dbHelper, db, _sessionCookie))
-                        Log.e(TAG, "An error occurred while attempting to cache listing data from subreddit: " + subreddit);
+                    RedditListing listing = ConnectionManager.CacheSubreddit(subreddit, _sessionCookie);
+                    if (listing == null || listing.data == null || listing.data.children == null)
+                    {
+                        Log.e(TAG, "An error occurred while attempting to retrieve listing data from subreddit: " + subreddit + ". Listing or data returned null.");
+                        progressUpdates.UpdatePercent = 100;
+                        publishProgress(progressUpdates);
+                        continue;
+                    }
+
+                    // Now insert the data from the listing into the db
+                    HashMap<String, Object> redditPostValues = new HashMap<>();
+                    int listingSize = listing.data.children.size();
+                    for (int j = 0; j < listingSize; j++)
+                    {
+                        RedditPost post = listing.data.children.get(j);
+                        if (post != null && post.data != null)
+                        {
+                            redditPostValues.put(RedditDatabaseContract.RedditPost.COLUMN_NAME_REDDITPOST_ID, post.data.id);
+                            redditPostValues.put(RedditDatabaseContract.RedditPost.COLUMN_NAME_SUBREDDIT_ID, subredditId);
+                            redditPostValues.put(RedditDatabaseContract.RedditPost.COLUMN_NAME_AUTHOR, post.data.author);
+                            redditPostValues.put(RedditDatabaseContract.RedditPost.COLUMN_NAME_TITLE, post.data.title);
+                            redditPostValues.put(RedditDatabaseContract.RedditPost.COLUMN_NAME_SCORE, post.data.score);
+                            redditPostValues.put(RedditDatabaseContract.RedditPost.COLUMN_NAME_CREATED, post.data.created_utc);
+                            redditPostValues.put(RedditDatabaseContract.RedditPost.COLUMN_NAME_SELFTEXT, post.data.selftext);
+                            redditPostValues.put(RedditDatabaseContract.RedditPost.COLUMN_NAME_URL, post.data.url);
+                            redditPostValues.put(RedditDatabaseContract.RedditPost.COLUMN_NAME_THUMBNAIL, post.data.thumbnail);
+                            redditPostValues.put(RedditDatabaseContract.RedditPost.COLUMN_NAME_NUM_COMMENTS, post.data.num_comments);
+                            redditPostValues.put(RedditDatabaseContract.RedditPost.COLUMN_NAME_IS_OVER_18, post.data.over_18);
+                            redditPostValues.put(RedditDatabaseContract.RedditPost.COLUMN_NAME_IS_STICKIED, post.data.stickied);
+                            redditPostValues.put(RedditDatabaseContract.RedditPost.COLUMN_NAME_IS_SELF, post.data.is_self);
+
+                            dbHelper.InsertIgnoreRedditPostRow(db, redditPostValues);
+                        }
+                        else
+                        {
+                            Log.e(TAG, "Error: RedditPost object or RedditPost data object came back null");
+                        }
+
+                        progressUpdates.UpdatePercent = (j + 1) / listingSize;
+                        publishProgress(progressUpdates);
+                        // Empty the values for the next post
+                        redditPostValues.clear();
+                    }
+
                 }
             }
             catch (IOException e)
@@ -186,10 +239,30 @@ public class CacheSubredditsScreen extends AppCompatActivity {
         }
 
         @Override
+        protected void onProgressUpdate(ProgressUpdates... updates)
+        {
+            String message = updates[0].UpdateMessage;
+            int progress = updates[0].UpdatePercent;
+
+            if (!message.equals(""))
+                _downloadDialog.setMessage(message);
+
+            _downloadDialog.setProgress(progress);
+        }
+
+        @Override
         protected void onPostExecute(Void v)
         {
             super.onPostExecute(v);
             _downloadDialog.dismiss();
         }
+    }
+
+    public class ProgressUpdates
+    {
+        public ProgressUpdates() {}
+
+        public String UpdateMessage;
+        public int UpdatePercent;
     }
 }

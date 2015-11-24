@@ -32,7 +32,12 @@
             android:label="@string/title_activity_login_screen"
             android:theme="@style/AppTheme.NoActionBar" >
         </activity>
-        <activity android:name=".CacheSubredditsScreen"
+        <activity
+            android:name=".CacheSubredditsScreen"
+            android:theme="@style/AppTheme.NoActionBar" >
+        </activity>
+        <activity
+            android:name=".SettingsScreen"
             android:theme="@style/AppTheme.NoActionBar" >
         </activity>
     </application>

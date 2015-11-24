@@ -17,8 +17,8 @@ public class MainScreen extends AppCompatActivity {
     private ListView menuOptions;
     private TextView currentUserLabel;
     private SharedPreferences appSettings;
-    private final String[] loggedOutMenuValues = new String[] { "Login to reddit" };
-    private final String[] loggedInMenuValues = new String[] { "Download from my subreddits", "Logout" };
+    private final String[] loggedOutMenuValues = new String[] { "Login to reddit", "Settings" };
+    private final String[] loggedInMenuValues = new String[] { "Download from my subreddits", "Settings", "Logout" };
     private String[] displayValues;
 
     @Override
@@ -31,7 +31,7 @@ public class MainScreen extends AppCompatActivity {
 
         // Bind the controls
         currentUserLabel = (TextView) findViewById(R.id.current_user_label);
-        menuOptions = (ListView) findViewById(R.id.main_menu_options);
+        menuOptions = (ListView) findViewById(R.id.options);
 
         // Determine login state
         if (appSettings.getBoolean(getString(R.string.LoginState), false))
@@ -44,7 +44,7 @@ public class MainScreen extends AppCompatActivity {
         else
         {   // logged out
             displayValues = loggedOutMenuValues;
-            currentUserLabel.setText("Current user: ");
+            currentUserLabel.setText("");
             currentUserLabel.setVisibility(View.GONE);
         }
 
@@ -64,6 +64,9 @@ public class MainScreen extends AppCompatActivity {
                         break;
                     case "Download from my subreddits":
                         sendUserToActivity(CacheSubredditsScreen.class);
+                        break;
+                    case "Settings":
+                        sendUserToActivity(SettingsScreen.class);
                         break;
                     case "Logout":
                         ApplicationManager.CreateAndShowAlertDialog(MainScreen.this, "Logout of Reddit", "Are you sure you want to logout?", "Logout", "Cancel", new ApplicationManager.DialogCallback() {

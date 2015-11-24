@@ -1,4 +1,4 @@
-package com.mikedaguillo.redditunderground2.data;
+package com.mikedaguillo.redditunderground2.data.api.json;
 
 /**
  * Java representation of a JSON reddit post

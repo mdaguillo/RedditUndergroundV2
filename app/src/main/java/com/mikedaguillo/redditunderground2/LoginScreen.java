@@ -19,12 +19,11 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.google.gson.Gson;
 import com.mikedaguillo.redditunderground2.data.RedditDatabaseHelper;
 import com.mikedaguillo.redditunderground2.utility.ApplicationManager;
 import com.mikedaguillo.redditunderground2.utility.ConnectionManager;
-
-import org.json.JSONObject;
+import com.mikedaguillo.redditunderground2.data.api.json.RedditSubreddits;
+import com.mikedaguillo.redditunderground2.data.api.json.RedditLogin;
 
 import java.io.IOException;
 
@@ -185,7 +184,7 @@ public class LoginScreen extends AppCompatActivity {
 
             try {
                 // Try and login
-                ConnectionManager.RedditLoginJSON redditReturnJSON = ConnectionManager.LoginToReddit(mUsername, mPassword);
+                RedditLogin redditReturnJSON = ConnectionManager.LoginToReddit(mUsername, mPassword);
 
                 // Check if we got a valid response
                 if (redditReturnJSON == null)
@@ -223,7 +222,7 @@ public class LoginScreen extends AppCompatActivity {
                 editor.commit();
 
                 // Now lets try and retrieve the user's subreddits
-                ConnectionManager.RedditSubredditsJSON subscribedSubreddits = ConnectionManager.GetCurrentUsersSubscribedSubreddits(redditReturnJSON.json.data.cookie);
+                RedditSubreddits subscribedSubreddits = ConnectionManager.GetCurrentUsersSubscribedSubreddits(redditReturnJSON.json.data.cookie);
 
                 if (subscribedSubreddits == null)
                 {
@@ -244,7 +243,7 @@ public class LoginScreen extends AppCompatActivity {
                 // Loop through the returned data and insert into the db
                 for (int i = 0; i < subscribedSubreddits.data.children.length; i++)
                 {
-                    ConnectionManager.RedditSubredditsJSON.SubredditDataObject subredditData = subscribedSubreddits.data.children[i].data;
+                    RedditSubreddits.SubredditDataObject subredditData = subscribedSubreddits.data.children[i].data;
                     helper.InsertIgnoreSubredditRow(
                             db,
                             subredditData.id,

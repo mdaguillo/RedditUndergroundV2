@@ -1,11 +1,11 @@
-package com.mikedaguillo.redditunderground2.data;
+package com.mikedaguillo.redditunderground2.data.api.json;
 
 import java.util.ArrayList;
 
 /**
  * Java representation of JSON listing from reddit
  */
-public final class Listing {
+public final class RedditListing {
     public String kind;
     public ListingData data;
 
