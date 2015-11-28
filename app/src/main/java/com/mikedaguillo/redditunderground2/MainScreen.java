@@ -17,8 +17,8 @@ public class MainScreen extends AppCompatActivity {
     private ListView menuOptions;
     private TextView currentUserLabel;
     private SharedPreferences appSettings;
-    private final String[] loggedOutMenuValues = new String[] { "Login to reddit", "Settings" };
-    private final String[] loggedInMenuValues = new String[] { "Download from my subreddits", "Settings", "Logout" };
+    private final String[] loggedOutMenuValues = new String[] { "Login to reddit", "View cached subreddits", "Settings" };
+    private final String[] loggedInMenuValues = new String[] { "View cached subreddits", "Download from my subreddits", "Settings", "Logout" };
     private String[] displayValues;
 
     @Override
@@ -63,7 +63,10 @@ public class MainScreen extends AppCompatActivity {
                         sendUserToActivity(LoginScreen.class);
                         break;
                     case "Download from my subreddits":
-                        sendUserToActivity(CacheSubredditsScreen.class);
+                        sendUserToActivity(DownloadSubredditsScreen.class);
+                        break;
+                    case "View cached subreddits":
+                        sendUserToActivity(CachedSubredditsScreen.class);
                         break;
                     case "Settings":
                         sendUserToActivity(SettingsScreen.class);

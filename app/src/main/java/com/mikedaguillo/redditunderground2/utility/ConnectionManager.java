@@ -5,6 +5,8 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Environment;
+import android.renderscript.ScriptGroup;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -16,14 +18,20 @@ import com.mikedaguillo.redditunderground2.data.api.json.RedditLogin;
 import com.mikedaguillo.redditunderground2.data.api.json.RedditPost;
 import com.mikedaguillo.redditunderground2.data.api.json.RedditSubreddits;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Set;
@@ -230,5 +238,67 @@ public final class ConnectionManager {
             Log.e(TAG, "Error making connection to listing", ex);
             return null;
         }
+    }
+
+    /**
+     * Takes a url to an image, downloads the image and saves it to file on the phone.
+     * Returns the filepath to the image if successful (or null otherwise).
+     */
+    public static String DownloadImageAndStoreInFile(String imageUrl, File storagePath, String fileName)
+    {
+        String filepath = null;
+        InputStream inputStream = null;
+        try
+        {
+            // If there is no thumbnail short circuit
+            if (imageUrl.equals(""))
+                return null;
+
+            // Attempt to make a connection
+            URL connectionUrl = new URL(imageUrl);
+            inputStream = connectionUrl.openStream();
+
+            // Determine the image extension
+            fileName = fileName + imageUrl.substring(imageUrl.lastIndexOf('.'));
+            // Now open an output stream we'll write to
+            File image = new File(storagePath, fileName);
+            OutputStream outputStream = new FileOutputStream(image);
+            BufferedInputStream bis = new BufferedInputStream(inputStream);
+            BufferedOutputStream bos = new BufferedOutputStream(outputStream);
+            int i;
+            while ((i = bis.read()) != -1)
+            {
+                bos.write(i);
+            }
+            bos.flush();
+            bos.close();
+            outputStream.close();
+
+            // Return the file path
+            Log.d(TAG, "File written to: " + image.getAbsolutePath());
+            filepath = image.getAbsolutePath();
+            return filepath;
+
+        }
+        catch (IOException ex)
+        {
+            Log.e(TAG, "An error occurred while downloading an image from the url " + imageUrl, ex);
+            if (inputStream != null)
+                try {
+                    inputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            return null;
+        }
+    }
+
+    public static File GetThumbnailStorageDirectory(Context context)
+    {
+        File file = new File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES), "thumbnails");
+        if (!file.exists() && !file.mkdirs())
+            Log.e(TAG, "Failed to create the thumbnail directory");
+
+        return file;
     }
 }

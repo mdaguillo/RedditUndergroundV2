@@ -6,7 +6,9 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
+import android.widget.ArrayAdapter;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -67,6 +69,9 @@ public class RedditDatabaseHelper extends SQLiteOpenHelper {
         return database.insertWithOnConflict(RedditDatabaseContract.RedditPost.TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_IGNORE);
     }
 
+    /**
+     * Truncates all tables in the database
+     */
     public boolean DeleteAllDataInDatabase(SQLiteDatabase database)
     {
         // Sqlite does not have a truncate command so we need to drop any tables and then recreate them
@@ -86,6 +91,44 @@ public class RedditDatabaseHelper extends SQLiteOpenHelper {
         {
             Log.e(TAG, "Error occurred attempting to delete data from database.", ex);
             return false;
+        }
+    }
+
+    /**
+     * Returns an array list of all of the subreddits that currently have associated posts stored in the db
+     */
+    public ArrayList<String> GetCachedSubreddits(SQLiteDatabase database)
+    {
+        Cursor cursor = null;
+        try {
+            // Set up the join
+            String sql = "SELECT DISTINCT s." + RedditDatabaseContract.Subreddit.COLUMN_NAME_DISPLAY_NAME
+                    + " FROM " + RedditDatabaseContract.Subreddit.TABLE_NAME + " s INNER JOIN "
+                    + RedditDatabaseContract.RedditPost.TABLE_NAME + " p ON s." + RedditDatabaseContract.Subreddit.COLUMN_NAME_SUBREDDIT_ID
+                    + " = p." + RedditDatabaseContract.RedditPost.COLUMN_NAME_SUBREDDIT_ID;
+
+            cursor = database.rawQuery(sql, new String[] {});
+            if (cursor.getCount() == 0) {
+                Log.e(TAG, "User has not cached any data from any subreddits");
+                return new ArrayList<>();
+            }
+
+            ArrayList<String> cachedSubreddits = new ArrayList<>();
+            while (cursor.moveToNext()) {
+                String displayName = cursor.getString(cursor.getColumnIndexOrThrow(RedditDatabaseContract.Subreddit.COLUMN_NAME_DISPLAY_NAME));
+                cachedSubreddits.add(displayName);
+            }
+
+            return cachedSubreddits;
+        }
+        catch (Exception e)
+        {
+            Log.e(TAG, "An exception occurred while attempting to query the database.", e);
+            return new ArrayList<>();
+        }
+        finally {
+            if (cursor != null)
+                cursor.close();
         }
     }
 }

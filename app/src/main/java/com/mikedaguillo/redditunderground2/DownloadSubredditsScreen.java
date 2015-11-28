@@ -23,11 +23,12 @@ import com.mikedaguillo.redditunderground2.data.api.json.RedditListing;
 import com.mikedaguillo.redditunderground2.data.api.json.RedditPost;
 import com.mikedaguillo.redditunderground2.utility.ConnectionManager;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class CacheSubredditsScreen extends AppCompatActivity {
+public class DownloadSubredditsScreen extends AppCompatActivity {
 
     ListView downloadSubredditsView;
     Button cacheButton;
@@ -101,8 +102,8 @@ public class CacheSubredditsScreen extends AppCompatActivity {
         Cursor subredditsCursor = db.query(
                 RedditDatabaseContract.Subreddit.TABLE_NAME,
                 new String[] { RedditDatabaseContract.Subreddit.COLUMN_NAME_DISPLAY_NAME, RedditDatabaseContract.Subreddit.COLUMN_NAME_SUBREDDIT_ID },
-                RedditDatabaseContract.Subreddit.COLUMN_NAME_SUBSCRIBED_USER + "=?",
-                new String[]{ appSettings.getString(getString(R.string.CurrentUser), "null") },
+                RedditDatabaseContract.Subreddit.COLUMN_NAME_SUBSCRIBED_USER + " LIKE ?",
+                new String[]{ "%" + appSettings.getString(getString(R.string.CurrentUser), "null") + "%" },
                 null,
                 null,
                 RedditDatabaseContract.Subreddit.COLUMN_NAME_DISPLAY_NAME + " ASC");
@@ -205,20 +206,28 @@ public class CacheSubredditsScreen extends AppCompatActivity {
                             redditPostValues.put(RedditDatabaseContract.RedditPost.COLUMN_NAME_CREATED, post.data.created_utc);
                             redditPostValues.put(RedditDatabaseContract.RedditPost.COLUMN_NAME_SELFTEXT, post.data.selftext);
                             redditPostValues.put(RedditDatabaseContract.RedditPost.COLUMN_NAME_URL, post.data.url);
-                            redditPostValues.put(RedditDatabaseContract.RedditPost.COLUMN_NAME_THUMBNAIL, post.data.thumbnail);
                             redditPostValues.put(RedditDatabaseContract.RedditPost.COLUMN_NAME_NUM_COMMENTS, post.data.num_comments);
                             redditPostValues.put(RedditDatabaseContract.RedditPost.COLUMN_NAME_IS_OVER_18, post.data.over_18);
                             redditPostValues.put(RedditDatabaseContract.RedditPost.COLUMN_NAME_IS_STICKIED, post.data.stickied);
                             redditPostValues.put(RedditDatabaseContract.RedditPost.COLUMN_NAME_IS_SELF, post.data.is_self);
 
-                            dbHelper.InsertIgnoreRedditPostRow(db, redditPostValues);
+                            // If there's a thumbnail, we attempt to download it and save it to file.
+                            // We save the path to the file in the database
+                            String imageName = post.data.id + "_" + "thumbnail";
+                            File thumbnailsFolder = ConnectionManager.GetThumbnailStorageDirectory(getApplicationContext());
+                            String imagePath = ConnectionManager.DownloadImageAndStoreInFile(post.data.thumbnail, thumbnailsFolder, imageName);
+
+                            redditPostValues.put(RedditDatabaseContract.RedditPost.COLUMN_NAME_THUMBNAIL, imagePath);
+
+                            long success = dbHelper.InsertIgnoreRedditPostRow(db, redditPostValues);
+                            Log.d(TAG, "Post row number: " + success);
                         }
                         else
                         {
                             Log.e(TAG, "Error: RedditPost object or RedditPost data object came back null");
                         }
 
-                        progressUpdates.UpdatePercent = (j + 1) / listingSize;
+                        progressUpdates.UpdatePercent = (int) ((j + 1) / listingSize) * 100;
                         publishProgress(progressUpdates);
                         // Empty the values for the next post
                         redditPostValues.clear();
