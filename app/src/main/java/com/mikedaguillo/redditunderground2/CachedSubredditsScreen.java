@@ -1,19 +1,19 @@
 package com.mikedaguillo.redditunderground2;
 
-import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.mikedaguillo.redditunderground2.data.RedditDatabaseHelper;
+import com.mikedaguillo.redditunderground2.data.database.RedditDatabaseHelper;
+import com.mikedaguillo.redditunderground2.utility.ApplicationManager;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class CachedSubredditsScreen extends AppCompatActivity {
 
@@ -30,7 +30,7 @@ public class CachedSubredditsScreen extends AppCompatActivity {
 
         // Bind the controls
         listingListView = (ListView) findViewById(R.id.subreddit_listing_view);
-        progressBar = (ProgressBar) findViewById(R.id.loadingBar);
+        progressBar = (ProgressBar) findViewById(R.id.subreddit_listing_progress_bar);
 
         // Display the loading bar while we query the database for the current user's subreddits with content
         progressBar.setVisibility(View.VISIBLE);
@@ -48,6 +48,13 @@ public class CachedSubredditsScreen extends AppCompatActivity {
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, android.R.id.text1, subredditsToDisplay);
         listingListView.setAdapter(adapter);
+        listingListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String subredditName = (String) listingListView.getItemAtPosition(position);
+                ApplicationManager.SendUserToActivity(getApplicationContext(), SubredditListingScreen.class, "subreddit", subredditName);
+            }
+        });
 
         // close the database
         database.close();

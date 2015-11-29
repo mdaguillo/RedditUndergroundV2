@@ -30,7 +30,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Example Post"
-            android:textSize="15sp" />
+            android:textSize="15sp"
+            android:textColor="#000"
+            />
 
         <TextView
             android:id="@+id/postAuthor"
@@ -42,6 +44,7 @@
             android:layout_below="@+id/postTitle"
             android:text="Author"
             android:textSize="10sp"
+            android:textColor="#000"
             />
 
         <TextView
@@ -55,6 +58,7 @@
             android:textSize="10sp"
             android:layout_marginLeft="5dp"
             android:layout_marginRight="5dp"
+            android:textColor="#000"
             />
 
         <TextView
@@ -66,6 +70,7 @@
             android:layout_below="@+id/postTitle"
             android:text="Subreddit"
             android:textSize="10sp"
+            android:textColor="#000"
             />
 
         <TextView
@@ -76,6 +81,7 @@
             android:layout_below="@+id/postAuthor"
             android:text="Comments"
             android:textSize="10sp"
+            android:textColor="#000"
             />
     </RelativeLayout>
 </RelativeLayout>

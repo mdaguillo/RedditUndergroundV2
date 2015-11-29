@@ -60,16 +60,16 @@ public class MainScreen extends AppCompatActivity {
                 switch (itemValue)
                 {
                     case "Login to reddit":
-                        sendUserToActivity(LoginScreen.class);
+                        ApplicationManager.SendUserToActivity(getApplicationContext(), LoginScreen.class, null, null);
                         break;
                     case "Download from my subreddits":
-                        sendUserToActivity(DownloadSubredditsScreen.class);
+                        ApplicationManager.SendUserToActivity(getApplicationContext(), DownloadSubredditsScreen.class, null, null);
                         break;
                     case "View cached subreddits":
-                        sendUserToActivity(CachedSubredditsScreen.class);
+                        ApplicationManager.SendUserToActivity(getApplicationContext(), CachedSubredditsScreen.class, null, null);
                         break;
                     case "Settings":
-                        sendUserToActivity(SettingsScreen.class);
+                        ApplicationManager.SendUserToActivity(getApplicationContext(), SettingsScreen.class, null, null);
                         break;
                     case "Logout":
                         ApplicationManager.CreateAndShowAlertDialog(MainScreen.this, "Logout of Reddit", "Are you sure you want to logout?", "Logout", "Cancel", new ApplicationManager.DialogCallback() {
@@ -91,11 +91,5 @@ public class MainScreen extends AppCompatActivity {
                 }
             }
         });
-    }
-
-    private void sendUserToActivity(Class destinationActivityClass)
-    {
-        Intent intent = new Intent(this, destinationActivityClass);
-        startActivity(intent);
     }
 }

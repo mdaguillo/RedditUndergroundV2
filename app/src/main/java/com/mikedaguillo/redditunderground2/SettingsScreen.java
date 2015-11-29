@@ -12,7 +12,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.mikedaguillo.redditunderground2.data.RedditDatabaseHelper;
+import com.mikedaguillo.redditunderground2.data.database.RedditDatabaseHelper;
 import com.mikedaguillo.redditunderground2.utility.ApplicationManager;
 
 public class SettingsScreen extends AppCompatActivity {

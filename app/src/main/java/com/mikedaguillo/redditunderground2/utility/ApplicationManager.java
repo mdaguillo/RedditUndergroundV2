@@ -4,6 +4,10 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.support.annotation.Nullable;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
@@ -39,5 +43,19 @@ public final class ApplicationManager {
     {
         InputMethodManager imm = (InputMethodManager)activity.getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(targetView.getApplicationWindowToken(), 0);
+    }
+
+    public static Bitmap GetThumbnailFromFile(String filePath)
+    {
+        return BitmapFactory.decodeFile(filePath);
+    }
+
+    public static void SendUserToActivity(Context callingContext, Class destinationClass, String intentKey, String intentData)
+    {
+        Intent intent = new Intent(callingContext, destinationClass);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        if (intentData != null)
+            intent.putExtra(intentKey, intentData);
+        callingContext.startActivity(intent);
     }
 }

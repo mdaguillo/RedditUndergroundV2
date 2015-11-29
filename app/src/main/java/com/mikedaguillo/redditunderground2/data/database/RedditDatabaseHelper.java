@@ -1,12 +1,15 @@
-package com.mikedaguillo.redditunderground2.data;
+package com.mikedaguillo.redditunderground2.data.database;
 
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.graphics.Bitmap;
 import android.util.Log;
-import android.widget.ArrayAdapter;
+
+import com.mikedaguillo.redditunderground2.data.RedditPostListItem;
+import com.mikedaguillo.redditunderground2.utility.ApplicationManager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -53,7 +56,7 @@ public class RedditDatabaseHelper extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
 
         values.put(RedditDatabaseContract.RedditPost.COLUMN_NAME_REDDITPOST_ID, (String) rowValues.get(RedditDatabaseContract.RedditPost.COLUMN_NAME_REDDITPOST_ID));
-        values.put(RedditDatabaseContract.RedditPost.COLUMN_NAME_SUBREDDIT_ID, (String) rowValues.get(RedditDatabaseContract.RedditPost.COLUMN_NAME_SUBREDDIT_ID));
+        values.put(RedditDatabaseContract.RedditPost.COLUMN_NAME_SUBREDDIT_DISPLAY_NAME, (String) rowValues.get(RedditDatabaseContract.RedditPost.COLUMN_NAME_SUBREDDIT_DISPLAY_NAME));
         values.put(RedditDatabaseContract.RedditPost.COLUMN_NAME_AUTHOR, (String) rowValues.get(RedditDatabaseContract.RedditPost.COLUMN_NAME_AUTHOR));
         values.put(RedditDatabaseContract.RedditPost.COLUMN_NAME_TITLE, (String) rowValues.get(RedditDatabaseContract.RedditPost.COLUMN_NAME_TITLE));
         values.put(RedditDatabaseContract.RedditPost.COLUMN_NAME_SCORE, (int) rowValues.get(RedditDatabaseContract.RedditPost.COLUMN_NAME_SCORE));
@@ -104,8 +107,8 @@ public class RedditDatabaseHelper extends SQLiteOpenHelper {
             // Set up the join
             String sql = "SELECT DISTINCT s." + RedditDatabaseContract.Subreddit.COLUMN_NAME_DISPLAY_NAME
                     + " FROM " + RedditDatabaseContract.Subreddit.TABLE_NAME + " s INNER JOIN "
-                    + RedditDatabaseContract.RedditPost.TABLE_NAME + " p ON s." + RedditDatabaseContract.Subreddit.COLUMN_NAME_SUBREDDIT_ID
-                    + " = p." + RedditDatabaseContract.RedditPost.COLUMN_NAME_SUBREDDIT_ID;
+                    + RedditDatabaseContract.RedditPost.TABLE_NAME + " p ON s." + RedditDatabaseContract.Subreddit.COLUMN_NAME_DISPLAY_NAME
+                    + " = p." + RedditDatabaseContract.RedditPost.COLUMN_NAME_SUBREDDIT_DISPLAY_NAME;
 
             cursor = database.rawQuery(sql, new String[] {});
             if (cursor.getCount() == 0) {
@@ -129,6 +132,55 @@ public class RedditDatabaseHelper extends SQLiteOpenHelper {
         finally {
             if (cursor != null)
                 cursor.close();
+        }
+    }
+
+    /**
+     * Returns a list of saved reddit posts for a subreddit
+     */
+    public ArrayList<RedditPostListItem> GetPostsForSubreddit(String subredditName) {
+        Cursor cursor = null;
+        SQLiteDatabase database = null;
+        try
+        {
+            database = getReadableDatabase();
+            cursor = database.query(
+                    RedditDatabaseContract.RedditPost.TABLE_NAME,
+                    null,
+                    RedditDatabaseContract.RedditPost.COLUMN_NAME_SUBREDDIT_DISPLAY_NAME + "=?",
+                    new String[]{subredditName},
+                    null,
+                    null,
+                    null,
+                    null
+            );
+            ArrayList<RedditPostListItem> savedPosts = new ArrayList<>();
+            while (cursor.moveToNext())
+            {
+                savedPosts.add(new RedditPostListItem(
+                        cursor.getString(cursor.getColumnIndexOrThrow(RedditDatabaseContract.RedditPost.COLUMN_NAME_REDDITPOST_ID)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(RedditDatabaseContract.RedditPost.COLUMN_NAME_TITLE)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(RedditDatabaseContract.RedditPost.COLUMN_NAME_AUTHOR)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(RedditDatabaseContract.RedditPost.COLUMN_NAME_SUBREDDIT_DISPLAY_NAME)),
+                        cursor.getInt(cursor.getColumnIndexOrThrow(RedditDatabaseContract.RedditPost.COLUMN_NAME_NUM_COMMENTS)),
+                        ApplicationManager.GetThumbnailFromFile(cursor.getString(cursor.getColumnIndexOrThrow(RedditDatabaseContract.RedditPost.COLUMN_NAME_THUMBNAIL)))
+                ));
+            }
+
+            return savedPosts;
+        }
+        catch (Exception ex)
+        {
+            Log.e(TAG, "An error occurred while attempting to retrieve the stored posts for the subreddit: " + subredditName + ".", ex);
+            return null;
+        }
+        finally
+        {
+            if (cursor != null)
+                cursor.close();
+
+            if (database != null)
+                database.close();
         }
     }
 }

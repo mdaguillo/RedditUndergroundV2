@@ -1,4 +1,4 @@
-package com.mikedaguillo.redditunderground2.data;
+package com.mikedaguillo.redditunderground2.data.database;
 
 import android.provider.BaseColumns;
 
@@ -36,7 +36,7 @@ public final class RedditDatabaseContract {
             "CREATE TABLE " + RedditPost.TABLE_NAME + " ("
             + RedditPost._ID + INTEGER_TYPE + " PRIMARY KEY,"
             + RedditPost.COLUMN_NAME_REDDITPOST_ID + TEXT_TYPE + COMMA_SEP
-            + RedditPost.COLUMN_NAME_SUBREDDIT_ID + TEXT_TYPE + COMMA_SEP
+            + RedditPost.COLUMN_NAME_SUBREDDIT_DISPLAY_NAME + TEXT_TYPE + COMMA_SEP
             + RedditPost.COLUMN_NAME_AUTHOR + TEXT_TYPE + COMMA_SEP
             + RedditPost.COLUMN_NAME_TITLE + TEXT_TYPE + COMMA_SEP
             + RedditPost.COLUMN_NAME_SCORE + INTEGER_TYPE + COMMA_SEP
@@ -49,7 +49,7 @@ public final class RedditDatabaseContract {
             + RedditPost.COLUMN_NAME_IS_STICKIED + INTEGER_TYPE + COMMA_SEP
             + RedditPost.COLUMN_NAME_IS_SELF + INTEGER_TYPE + COMMA_SEP
             + UNIQUE + "(" + RedditPost.COLUMN_NAME_REDDITPOST_ID + ")"
-            + FOREIGN_KEY + "(" + RedditPost.COLUMN_NAME_SUBREDDIT_ID + ")" + REFERENCES + Subreddit.TABLE_NAME + "(" + Subreddit.COLUMN_NAME_SUBREDDIT_ID + ")"
+            + FOREIGN_KEY + "(" + RedditPost.COLUMN_NAME_SUBREDDIT_DISPLAY_NAME + ")" + REFERENCES + Subreddit.TABLE_NAME + "(" + Subreddit.COLUMN_NAME_DISPLAY_NAME + ")"
             + " )";
 
     public static final String SQL_DELETE_TABLE_REDDITPOST =
@@ -69,7 +69,7 @@ public final class RedditDatabaseContract {
     {
         public static final String TABLE_NAME = "redditpost";
         public static final String COLUMN_NAME_REDDITPOST_ID = "redditpost_id";
-        public static final String COLUMN_NAME_SUBREDDIT_ID = "subreddit_id"; // Foreign key
+        public static final String COLUMN_NAME_SUBREDDIT_DISPLAY_NAME = "display_name"; // Foreign key
         public static final String COLUMN_NAME_AUTHOR = "author";
         public static final String COLUMN_NAME_TITLE = "title";
         public static final String COLUMN_NAME_SCORE = "score";

@@ -19,7 +19,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.mikedaguillo.redditunderground2.data.RedditDatabaseHelper;
+import com.mikedaguillo.redditunderground2.data.database.RedditDatabaseHelper;
 import com.mikedaguillo.redditunderground2.utility.ApplicationManager;
 import com.mikedaguillo.redditunderground2.utility.ConnectionManager;
 import com.mikedaguillo.redditunderground2.data.api.json.RedditSubreddits;

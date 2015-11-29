@@ -2,20 +2,15 @@ package com.mikedaguillo.redditunderground2.utility;
 
 import android.app.Activity;
 import android.content.Context;
-import android.database.sqlite.SQLiteDatabase;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Environment;
-import android.renderscript.ScriptGroup;
 import android.util.Log;
 
 import com.google.gson.Gson;
 import com.mikedaguillo.redditunderground2.data.api.*;
-import com.mikedaguillo.redditunderground2.data.RedditDatabaseContract;
-import com.mikedaguillo.redditunderground2.data.RedditDatabaseHelper;
 import com.mikedaguillo.redditunderground2.data.api.json.RedditListing;
 import com.mikedaguillo.redditunderground2.data.api.json.RedditLogin;
-import com.mikedaguillo.redditunderground2.data.api.json.RedditPost;
 import com.mikedaguillo.redditunderground2.data.api.json.RedditSubreddits;
 
 import java.io.BufferedInputStream;
@@ -29,10 +24,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
-import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Set;
 
@@ -246,12 +238,12 @@ public final class ConnectionManager {
      */
     public static String DownloadImageAndStoreInFile(String imageUrl, File storagePath, String fileName)
     {
-        String filepath = null;
+        String filepath;
         InputStream inputStream = null;
         try
         {
             // If there is no thumbnail short circuit
-            if (imageUrl.equals(""))
+            if (imageUrl.equals("") || !imageUrl.startsWith("http"))
                 return null;
 
             // Attempt to make a connection
@@ -293,6 +285,9 @@ public final class ConnectionManager {
         }
     }
 
+    /**
+     * Returns the directory where thumbnail images are stored. If the directory does not exist yet, it creates it.
+     */
     public static File GetThumbnailStorageDirectory(Context context)
     {
         File file = new File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES), "thumbnails");

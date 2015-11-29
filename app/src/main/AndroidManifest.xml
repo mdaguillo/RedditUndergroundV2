@@ -38,7 +38,11 @@
         </activity>
         <activity
             android:name=".CachedSubredditsScreen"
-            android:theme="@style/AppTheme.NoActionBar" >>
+            android:theme="@style/AppTheme.NoActionBar" >
+        </activity>
+        <activity
+            android:name=".SubredditListingScreen"
+            android:theme="@style/AppTheme.NoActionBar">
         </activity>
     </application>
 

@@ -17,8 +17,8 @@ import android.widget.CheckedTextView;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.mikedaguillo.redditunderground2.data.RedditDatabaseContract;
-import com.mikedaguillo.redditunderground2.data.RedditDatabaseHelper;
+import com.mikedaguillo.redditunderground2.data.database.RedditDatabaseContract;
+import com.mikedaguillo.redditunderground2.data.database.RedditDatabaseHelper;
 import com.mikedaguillo.redditunderground2.data.api.json.RedditListing;
 import com.mikedaguillo.redditunderground2.data.api.json.RedditPost;
 import com.mikedaguillo.redditunderground2.utility.ConnectionManager;
@@ -34,20 +34,18 @@ public class DownloadSubredditsScreen extends AppCompatActivity {
     Button cacheButton;
     SharedPreferences appSettings;
     ArrayList<String> subredditsToCache;
-    HashMap<String, String> subredditIds;
     String sessionCookie;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_cache_subreddits);
+        setContentView(R.layout.activity_download_subreddits_screen);
 
         // Bind the controls
         downloadSubredditsView = (ListView) findViewById(R.id.download_subreddits_listview);
         downloadSubredditsView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
         cacheButton = (Button) findViewById(R.id.cache_button);
         subredditsToCache = new ArrayList<>();
-        subredditIds = new HashMap<>();
 
         // Retrieve the settings and the session cookie
         appSettings = this.getSharedPreferences("app_settings", Context.MODE_PRIVATE);
@@ -86,7 +84,7 @@ public class DownloadSubredditsScreen extends AppCompatActivity {
         cacheButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                CacheSubredditData async = new CacheSubredditData(subredditsToCache, subredditIds, sessionCookie, v.getContext());
+                CacheSubredditData async = new CacheSubredditData(subredditsToCache, sessionCookie, v.getContext());
                 async.execute();
             }
         });
@@ -118,11 +116,7 @@ public class DownloadSubredditsScreen extends AppCompatActivity {
         while (subredditsCursor.moveToNext())
         {
             String subredditDisplayName = subredditsCursor.getString(subredditsCursor.getColumnIndexOrThrow(RedditDatabaseContract.Subreddit.COLUMN_NAME_DISPLAY_NAME));
-            String subredditId = subredditsCursor.getString(subredditsCursor.getColumnIndexOrThrow(RedditDatabaseContract.Subreddit.COLUMN_NAME_SUBREDDIT_ID));
-
             subreddits.add(subredditDisplayName);
-            // Also keep the ids stored in a hashmap
-            subredditIds.put(subredditDisplayName, subredditId);
         }
 
         subredditsCursor.close();
@@ -139,12 +133,10 @@ public class DownloadSubredditsScreen extends AppCompatActivity {
         private ArrayList<String> _subredditsToCache;
         private String _sessionCookie;
         private ProgressDialog _downloadDialog;
-        private HashMap<String, String> _subredditIds;
 
-        public CacheSubredditData(ArrayList<String> subredditsToCache, HashMap<String, String> subRedditIds, String sessionCookie, Context context)
+        public CacheSubredditData(ArrayList<String> subredditsToCache, String sessionCookie, Context context)
         {
             _subredditsToCache = subredditsToCache;
-            _subredditIds = subRedditIds;
             _sessionCookie = sessionCookie;
             _downloadDialog = new ProgressDialog(context);
         }
@@ -180,7 +172,6 @@ public class DownloadSubredditsScreen extends AppCompatActivity {
                     progressUpdates.UpdateMessage = "Locally caching posts for subreddit: " + subreddit;
                     publishProgress(progressUpdates);
 
-                    String subredditId = _subredditIds.get(subreddit);
                     RedditListing listing = ConnectionManager.CacheSubreddit(subreddit, _sessionCookie);
                     if (listing == null || listing.data == null || listing.data.children == null)
                     {
@@ -199,7 +190,7 @@ public class DownloadSubredditsScreen extends AppCompatActivity {
                         if (post != null && post.data != null)
                         {
                             redditPostValues.put(RedditDatabaseContract.RedditPost.COLUMN_NAME_REDDITPOST_ID, post.data.id);
-                            redditPostValues.put(RedditDatabaseContract.RedditPost.COLUMN_NAME_SUBREDDIT_ID, subredditId);
+                            redditPostValues.put(RedditDatabaseContract.RedditPost.COLUMN_NAME_SUBREDDIT_DISPLAY_NAME, subreddit);
                             redditPostValues.put(RedditDatabaseContract.RedditPost.COLUMN_NAME_AUTHOR, post.data.author);
                             redditPostValues.put(RedditDatabaseContract.RedditPost.COLUMN_NAME_TITLE, post.data.title);
                             redditPostValues.put(RedditDatabaseContract.RedditPost.COLUMN_NAME_SCORE, post.data.score);
