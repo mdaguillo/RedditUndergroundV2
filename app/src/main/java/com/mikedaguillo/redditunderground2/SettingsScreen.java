@@ -19,7 +19,7 @@ public class SettingsScreen extends AppCompatActivity {
 
     private ListView settingsView;
     private TextView currentUserLabel;
-    private String[] settingOptions = new String[] { "Clear database" };
+    private String[] settingOptions = new String[] { "Clear all data" };
     private SharedPreferences appSettings;
 
     @Override
@@ -57,22 +57,22 @@ public class SettingsScreen extends AppCompatActivity {
 
                 switch(itemValue)
                 {
-                    case "Clear database":
-                        ApplicationManager.CreateAndShowAlertDialog(SettingsScreen.this, "Clear Database", "Are you certain you want to delete all of the data stored in the database?", "Delete", "Cancel", new ApplicationManager.DialogCallback() {
+                    case "Clear all data":
+                        ApplicationManager.CreateAndShowAlertDialog(SettingsScreen.this, "Clear Data", "Are you certain you want to delete all subreddit data currently saved?", "Delete", "Cancel", new ApplicationManager.DialogCallback() {
                             @Override
                             public void execute() {
+                                Context context = getApplicationContext();
                                 // Clear out the current logged in user settings
-                                RedditDatabaseHelper dbHelper = new RedditDatabaseHelper(getApplicationContext());
-                                SQLiteDatabase database = dbHelper.getWritableDatabase();
+                                RedditDatabaseHelper dbHelper = new RedditDatabaseHelper(context);
 
                                 Toast returnMessage;
-                                if (dbHelper.DeleteAllDataInDatabase(database))
-                                    returnMessage = Toast.makeText(getApplicationContext(), "Data deleted successfully!", Toast.LENGTH_LONG);
+                                if (dbHelper.DeleteAllData(getApplicationContext()))
+                                    returnMessage = Toast.makeText(context, "Data deleted successfully!", Toast.LENGTH_LONG);
                                 else
-                                    returnMessage = Toast.makeText(getApplicationContext(), "An error occurred while deleting data. Please try again.", Toast.LENGTH_LONG);
+                                    returnMessage = Toast.makeText(context, "An error occurred while deleting data. Please try again.", Toast.LENGTH_LONG);
 
+                                dbHelper.close();
                                 returnMessage.show(); // Show the message
-                                database.close(); // Close the database
                             }
                         });
                         break;

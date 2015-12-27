@@ -58,6 +58,7 @@ public class CachedSubredditsScreen extends AppCompatActivity {
 
         // close the database
         database.close();
+        dbHelper.close();
 
         progressBar.setVisibility(View.INVISIBLE);
     }

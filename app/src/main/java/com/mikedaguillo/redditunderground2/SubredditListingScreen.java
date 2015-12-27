@@ -1,14 +1,15 @@
 package com.mikedaguillo.redditunderground2;
 
+import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
-import android.graphics.Bitmap;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -16,7 +17,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.mikedaguillo.redditunderground2.data.RedditPostListItem;
-import com.mikedaguillo.redditunderground2.data.database.RedditDatabaseContract;
 import com.mikedaguillo.redditunderground2.data.database.RedditDatabaseHelper;
 import com.mikedaguillo.redditunderground2.utility.ApplicationManager;
 
@@ -28,9 +28,8 @@ public class SubredditListingScreen extends AppCompatActivity {
     private RedditDatabaseHelper dbHelper;
     private ListView listingView;
 
+    private final String TAG = "SubredditListingScreen";
 
-
-    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_subreddit_listing_screen);
@@ -50,6 +49,14 @@ public class SubredditListingScreen extends AppCompatActivity {
         dbHelper = new RedditDatabaseHelper(this);
         RedditPostAdapter postAdapter = new RedditPostAdapter(subredditName, dbHelper);
         listingView.setAdapter(postAdapter);
+        listingView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                // Retrieve the post id and send the user to the post view
+                RedditPostListItem clickedPost = (RedditPostListItem)listingView.getItemAtPosition(position);
+                ApplicationManager.SendUserToActivity(getApplicationContext(), ViewPostScreen.class, "postId", clickedPost.postId);
+            }
+        });
 
         progressBar.setVisibility(View.INVISIBLE);
     }
@@ -69,20 +76,18 @@ public class SubredditListingScreen extends AppCompatActivity {
 
         @Override
         public Object getItem(int position) {
-            return null;
+            return savedPosts.get(position);
         }
 
         @Override
-        public long getItemId(int position) {
-            return position;
-        }
+        public long getItemId(int position) { return position; }
 
         @Override
         public View getView(int position, View view, ViewGroup parent) {
             if (view == null)
             {
                 LayoutInflater inflater = (LayoutInflater) getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                view = inflater.inflate(R.layout.reddit_list_item, parent, false);
+                view = inflater.inflate(R.layout.reddit_post_list_item, parent, false);
             }
 
             TextView postTitle = (TextView)view.findViewById(R.id.postTitle);
@@ -97,8 +102,13 @@ public class SubredditListingScreen extends AppCompatActivity {
             postAuthor.setText(post.author);
             postSubReddit.setText(post.subreddit);
             postComments.setText("Comments: " + post.numComments);
-            if (post.thumbnail != null)
+            if (post.thumbnail != null) {
                 postThumbnail.setImageBitmap(post.thumbnail);
+                postThumbnail.setVisibility(View.VISIBLE);
+            }
+            else {
+                postThumbnail.setVisibility(View.GONE);
+            }
 
             return view;
         }

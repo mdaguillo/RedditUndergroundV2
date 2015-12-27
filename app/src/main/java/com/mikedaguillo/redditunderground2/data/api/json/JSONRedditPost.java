@@ -3,7 +3,7 @@ package com.mikedaguillo.redditunderground2.data.api.json;
 /**
  * Java representation of a JSON reddit post
  */
-public final class RedditPost {
+public final class JSONRedditPost {
     public String kind;
     public RedditPostData data;
 

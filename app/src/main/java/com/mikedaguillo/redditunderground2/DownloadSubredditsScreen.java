@@ -17,10 +17,11 @@ import android.widget.CheckedTextView;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.mikedaguillo.redditunderground2.data.api.json.JSONRedditPost;
 import com.mikedaguillo.redditunderground2.data.database.RedditDatabaseContract;
 import com.mikedaguillo.redditunderground2.data.database.RedditDatabaseHelper;
 import com.mikedaguillo.redditunderground2.data.api.json.RedditListing;
-import com.mikedaguillo.redditunderground2.data.api.json.RedditPost;
+import com.mikedaguillo.redditunderground2.utility.ApplicationManager;
 import com.mikedaguillo.redditunderground2.utility.ConnectionManager;
 
 import java.io.File;
@@ -108,7 +109,7 @@ public class DownloadSubredditsScreen extends AppCompatActivity {
 
         if (subredditsCursor.getCount() == 0)
         {   // The current user has no saved subreddits. Prompt them to download them if they have an internet connection
-            recreate();
+            // recreate();
         }
 
         // We have the subreddits, display them
@@ -121,6 +122,7 @@ public class DownloadSubredditsScreen extends AppCompatActivity {
 
         subredditsCursor.close();
         db.close();
+        helper.close();
 
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_multiple_choice, android.R.id.text1, subreddits);
         downloadSubredditsView.setAdapter(adapter);
@@ -163,13 +165,13 @@ public class DownloadSubredditsScreen extends AppCompatActivity {
 
                 // Create the object we'll use to update the progress dialog
                 ProgressUpdates progressUpdates = new ProgressUpdates();
-                progressUpdates.UpdatePercent = 0;
 
                 // Loop through the selected subreddits and download listing info from reddit
                 for (int i = 0; i < _subredditsToCache.size(); i++)
                 {
                     String subreddit = _subredditsToCache.get(i);
                     progressUpdates.UpdateMessage = "Locally caching posts for subreddit: " + subreddit;
+                    progressUpdates.UpdatePercent = 0;
                     publishProgress(progressUpdates);
 
                     RedditListing listing = ConnectionManager.CacheSubreddit(subreddit, _sessionCookie);
@@ -186,7 +188,7 @@ public class DownloadSubredditsScreen extends AppCompatActivity {
                     int listingSize = listing.data.children.size();
                     for (int j = 0; j < listingSize; j++)
                     {
-                        RedditPost post = listing.data.children.get(j);
+                        JSONRedditPost post = listing.data.children.get(j);
                         if (post != null && post.data != null)
                         {
                             redditPostValues.put(RedditDatabaseContract.RedditPost.COLUMN_NAME_REDDITPOST_ID, post.data.id);
@@ -205,8 +207,11 @@ public class DownloadSubredditsScreen extends AppCompatActivity {
                             // If there's a thumbnail, we attempt to download it and save it to file.
                             // We save the path to the file in the database
                             String imageName = post.data.id + "_" + "thumbnail";
-                            File thumbnailsFolder = ConnectionManager.GetThumbnailStorageDirectory(getApplicationContext());
+                            File thumbnailsFolder = ApplicationManager.GetThumbnailStorageDirectory(getApplicationContext());
                             String imagePath = ConnectionManager.DownloadImageAndStoreInFile(post.data.thumbnail, thumbnailsFolder, imageName);
+
+                            // If there's an image, we also make an attempt to download it and save it to file
+                            // TODO: Download the full image file and store it on disk
 
                             redditPostValues.put(RedditDatabaseContract.RedditPost.COLUMN_NAME_THUMBNAIL, imagePath);
 
@@ -215,10 +220,10 @@ public class DownloadSubredditsScreen extends AppCompatActivity {
                         }
                         else
                         {
-                            Log.e(TAG, "Error: RedditPost object or RedditPost data object came back null");
+                            Log.e(TAG, "Error: JSONRedditPost object or JSONRedditPost data object came back null");
                         }
 
-                        progressUpdates.UpdatePercent = (int) ((j + 1) / listingSize) * 100;
+                        progressUpdates.UpdatePercent = (int)(((float)(j+1)/listingSize) * 100);
                         publishProgress(progressUpdates);
                         // Empty the values for the next post
                         redditPostValues.clear();

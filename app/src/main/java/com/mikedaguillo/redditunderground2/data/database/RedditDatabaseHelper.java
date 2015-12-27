@@ -9,8 +9,13 @@ import android.graphics.Bitmap;
 import android.util.Log;
 
 import com.mikedaguillo.redditunderground2.data.RedditPostListItem;
+import com.mikedaguillo.redditunderground2.data.database.model.RedditPost;
 import com.mikedaguillo.redditunderground2.utility.ApplicationManager;
 
+import org.apache.commons.io.FileUtils;
+
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -75,26 +80,39 @@ public class RedditDatabaseHelper extends SQLiteOpenHelper {
     /**
      * Truncates all tables in the database
      */
-    public boolean DeleteAllDataInDatabase(SQLiteDatabase database)
+    public boolean DeleteAllData(Context context)
     {
-        // Sqlite does not have a truncate command so we need to drop any tables and then recreate them
-        try
-        {
-            // Delete
-            database.execSQL(RedditDatabaseContract.SQL_DELETE_TABLE_SUBREDDIT);
-            database.execSQL(RedditDatabaseContract.SQL_DELETE_TABLE_REDDITPOST);
+        SQLiteDatabase database = getWritableDatabase();
+        try {
 
-            // Recreate
-            database.execSQL(RedditDatabaseContract.SQL_CREATE_TABLE_SUBREDDIT);
-            database.execSQL(RedditDatabaseContract.SQL_CREATE_TABLE_REDDITPOST);
+            // Sqlite does not have a truncate command so we need to drop any tables and then recreate them
+            try {
+                // Delete
+                database.execSQL(RedditDatabaseContract.SQL_DELETE_TABLE_SUBREDDIT);
+                database.execSQL(RedditDatabaseContract.SQL_DELETE_TABLE_REDDITPOST);
 
-            return true;
+                // Recreate
+                database.execSQL(RedditDatabaseContract.SQL_CREATE_TABLE_SUBREDDIT);
+                database.execSQL(RedditDatabaseContract.SQL_CREATE_TABLE_REDDITPOST);
+            } catch (Exception ex) {
+                Log.e(TAG, "Error occurred attempting to delete data from database.", ex);
+                return false;
+            }
+
+            // Now try deleting any of the photos currently saved in the apps directories
+            try {
+                File thumbnailDirectory = ApplicationManager.GetThumbnailStorageDirectory(context);
+                FileUtils.cleanDirectory(thumbnailDirectory);
+            } catch (IOException ex) {
+                Log.e(TAG, "Error occurred while clearing the thumbnails directory.", ex);
+                return false;
+            }
         }
-        catch (Exception ex)
-        {
-            Log.e(TAG, "Error occurred attempting to delete data from database.", ex);
-            return false;
+        finally {
+            database.close();
         }
+
+        return true;
     }
 
     /**
@@ -136,7 +154,7 @@ public class RedditDatabaseHelper extends SQLiteOpenHelper {
     }
 
     /**
-     * Returns a list of saved reddit posts for a subreddit
+     * Returns a list of saved reddit post list items for a subreddit
      */
     public ArrayList<RedditPostListItem> GetPostsForSubreddit(String subredditName) {
         Cursor cursor = null;
@@ -176,6 +194,61 @@ public class RedditDatabaseHelper extends SQLiteOpenHelper {
         }
         finally
         {
+            if (cursor != null)
+                cursor.close();
+
+            if (database != null)
+                database.close();
+        }
+    }
+
+    /**
+     * Returns an object model of a Reddit Post in the database based on the post's id
+     */
+    public RedditPost GetPostById(String postId)
+    {
+        Cursor cursor = null;
+        SQLiteDatabase database = null;
+        try {
+            database = getReadableDatabase();
+            cursor = database.query(
+                    RedditDatabaseContract.RedditPost.TABLE_NAME,
+                    null,
+                    RedditDatabaseContract.RedditPost.COLUMN_NAME_REDDITPOST_ID + "=?",
+                    new String[] {postId},
+                    null,
+                    null,
+                    null,
+                    null
+            );
+
+            if (cursor.getCount() == 0)
+                throw new Exception("No post in database with id: " + postId);
+
+            cursor.moveToFirst();
+            RedditPost redditPost = new RedditPost(
+                    cursor.getString(cursor.getColumnIndexOrThrow(RedditDatabaseContract.RedditPost.COLUMN_NAME_REDDITPOST_ID)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(RedditDatabaseContract.RedditPost.COLUMN_NAME_SUBREDDIT_DISPLAY_NAME)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(RedditDatabaseContract.RedditPost.COLUMN_NAME_AUTHOR)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(RedditDatabaseContract.RedditPost.COLUMN_NAME_TITLE)),
+                    cursor.getInt(cursor.getColumnIndexOrThrow(RedditDatabaseContract.RedditPost.COLUMN_NAME_SCORE)),
+                    cursor.getFloat(cursor.getColumnIndexOrThrow(RedditDatabaseContract.RedditPost.COLUMN_NAME_CREATED)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(RedditDatabaseContract.RedditPost.COLUMN_NAME_SELFTEXT)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(RedditDatabaseContract.RedditPost.COLUMN_NAME_URL)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(RedditDatabaseContract.RedditPost.COLUMN_NAME_THUMBNAIL)),
+                    cursor.getInt(cursor.getColumnIndexOrThrow(RedditDatabaseContract.RedditPost.COLUMN_NAME_NUM_COMMENTS)),
+                    cursor.getInt(cursor.getColumnIndexOrThrow(RedditDatabaseContract.RedditPost.COLUMN_NAME_IS_OVER_18)),
+                    cursor.getInt(cursor.getColumnIndexOrThrow(RedditDatabaseContract.RedditPost.COLUMN_NAME_IS_STICKIED)),
+                    cursor.getInt(cursor.getColumnIndexOrThrow(RedditDatabaseContract.RedditPost.COLUMN_NAME_IS_SELF))
+            );
+
+            return redditPost;
+        }
+        catch (Exception ex) {
+            Log.e(TAG, "Error occurred while attempting to retrieve post with id: " + postId, ex);
+            return null;
+        }
+        finally {
             if (cursor != null)
                 cursor.close();
 

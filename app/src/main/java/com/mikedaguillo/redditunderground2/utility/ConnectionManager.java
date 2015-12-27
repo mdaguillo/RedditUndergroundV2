@@ -284,16 +284,4 @@ public final class ConnectionManager {
             return null;
         }
     }
-
-    /**
-     * Returns the directory where thumbnail images are stored. If the directory does not exist yet, it creates it.
-     */
-    public static File GetThumbnailStorageDirectory(Context context)
-    {
-        File file = new File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES), "thumbnails");
-        if (!file.exists() && !file.mkdirs())
-            Log.e(TAG, "Failed to create the thumbnail directory");
-
-        return file;
-    }
 }

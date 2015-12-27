@@ -12,6 +12,6 @@ public final class RedditListing {
     public class ListingData
     {
         public String modhash;
-        public ArrayList<RedditPost> children;
+        public ArrayList<JSONRedditPost> children;
     }
 }

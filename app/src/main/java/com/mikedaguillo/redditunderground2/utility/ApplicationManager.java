@@ -7,14 +7,19 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Environment;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+
+import java.io.File;
 
 /**
  * A general application level manager
  */
 public final class ApplicationManager {
+    private final static String TAG = "ApplicationManager";
 
     public static void CreateAndShowAlertDialog(Activity callingActivity, String title, String message, String positiveButtonText, String negativeButtonText, final DialogCallback callback) {
         AlertDialog.Builder builder = new AlertDialog.Builder(callingActivity);
@@ -57,5 +62,29 @@ public final class ApplicationManager {
         if (intentData != null)
             intent.putExtra(intentKey, intentData);
         callingContext.startActivity(intent);
+    }
+
+    /**
+     * Returns the directory where thumbnail images are stored. If the directory does not exist yet, it creates it.
+     */
+    public static File GetThumbnailStorageDirectory(Context context)
+    {
+        File file = new File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES), "thumbnails");
+        if (!file.exists() && !file.mkdirs())
+            Log.e(TAG, "Failed to create the thumbnail directory");
+
+        return file;
+    }
+
+    /**
+     * Returns the directory where the fully downloaded images are stored. If the directory does not yet exist, it creates it.
+     */
+    public static File GetImageStorageDirectory(Context context)
+    {
+        File file = new File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES), "images");
+        if (!file.exists() && !file.mkdirs())
+            Log.e(TAG, "Failed to create the images directory");
+
+        return file;
     }
 }
