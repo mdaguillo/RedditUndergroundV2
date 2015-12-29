@@ -191,8 +191,13 @@ public class DownloadSubredditsScreen extends AppCompatActivity {
                         JSONRedditPost post = listing.data.children.get(j);
                         if (post != null && post.data != null)
                         {
+                            Log.d(TAG, "Testing whether the truncate function works: " + post.data.GetSubredditTruncatedId());
+
                             redditPostValues.put(RedditDatabaseContract.RedditPost.COLUMN_NAME_REDDITPOST_ID, post.data.id);
-                            redditPostValues.put(RedditDatabaseContract.RedditPost.COLUMN_NAME_SUBREDDIT_DISPLAY_NAME, subreddit);
+                            redditPostValues.put(RedditDatabaseContract.RedditPost.COLUMN_NAME_REDDITPOST_FULL_NAME, post.data.name);
+                            redditPostValues.put(RedditDatabaseContract.RedditPost.COLUMN_NAME_SUBREDDIT_ID, post.data.GetSubredditTruncatedId());
+                            redditPostValues.put(RedditDatabaseContract.RedditPost.COLUMN_NAME_SUBREDDIT_FULL_NAME, post.data.subreddit_id);
+                            redditPostValues.put(RedditDatabaseContract.RedditPost.COLUMN_NAME_SUBREDDIT_DISPLAY_NAME, post.data.subreddit);
                             redditPostValues.put(RedditDatabaseContract.RedditPost.COLUMN_NAME_AUTHOR, post.data.author);
                             redditPostValues.put(RedditDatabaseContract.RedditPost.COLUMN_NAME_TITLE, post.data.title);
                             redditPostValues.put(RedditDatabaseContract.RedditPost.COLUMN_NAME_SCORE, post.data.score);

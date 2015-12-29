@@ -4,14 +4,13 @@ import android.app.Activity;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.Environment;
 import android.util.Log;
 
 import com.google.gson.Gson;
 import com.mikedaguillo.redditunderground2.data.api.*;
 import com.mikedaguillo.redditunderground2.data.api.json.RedditListing;
 import com.mikedaguillo.redditunderground2.data.api.json.RedditLogin;
-import com.mikedaguillo.redditunderground2.data.api.json.RedditSubreddits;
+import com.mikedaguillo.redditunderground2.data.api.json.JSONRedditSubreddits;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -104,7 +103,7 @@ public final class ConnectionManager {
         }
     }
 
-    public static RedditSubreddits GetCurrentUsersSubscribedSubreddits(String sessionCookie) {
+    public static JSONRedditSubreddits GetCurrentUsersSubscribedSubreddits(String sessionCookie) {
         InputStream inputStream = null;
         try {
             // Construct subreddits url
@@ -132,7 +131,7 @@ public final class ConnectionManager {
             Log.d(TAG, "Subreddits return values: " + returnValues);
 
             Gson gson = new Gson();
-            RedditSubreddits subredditsJSON = gson.fromJson(returnValues, RedditSubreddits.class);
+            JSONRedditSubreddits subredditsJSON = gson.fromJson(returnValues, JSONRedditSubreddits.class);
             return subredditsJSON;
         } catch (IOException e) {
             Log.e(TAG, "Error occurred while attempting to retrieve user subreddits.", e);

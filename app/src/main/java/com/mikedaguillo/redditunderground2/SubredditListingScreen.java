@@ -1,11 +1,9 @@
 package com.mikedaguillo.redditunderground2;
 
-import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -66,7 +64,7 @@ public class SubredditListingScreen extends AppCompatActivity {
 
         public RedditPostAdapter(String subredditName, RedditDatabaseHelper dbHelper)
         {
-            savedPosts = dbHelper.GetPostsForSubreddit(subredditName);
+            savedPosts = dbHelper.GetPostListItemsForSubreddit(subredditName);
         }
 
         @Override

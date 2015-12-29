@@ -37,7 +37,7 @@ public class CachedSubredditsScreen extends AppCompatActivity {
 
         dbHelper = new RedditDatabaseHelper(this);
         database = dbHelper.getReadableDatabase();
-        subredditsToDisplay = dbHelper.GetCachedSubreddits(database);
+        subredditsToDisplay = dbHelper.GetCachedSubredditNames(database);
 
         if (subredditsToDisplay.size() == 0)
         {

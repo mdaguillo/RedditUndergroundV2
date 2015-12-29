@@ -25,7 +25,7 @@
                     android:layout_height="wrap_content" android:hint="@string/prompt_username"
                     android:inputType="textEmailAddress" android:maxLines="1"
                     android:singleLine="true"
-                    android:text="BetaRhoOmega"/>
+                    android:text=""/>
 
             </android.support.design.widget.TextInputLayout>
 
@@ -38,7 +38,7 @@
                     android:imeActionLabel="@string/action_sign_in_short"
                     android:imeOptions="actionUnspecified" android:inputType="textPassword"
                     android:maxLines="1" android:singleLine="true"
-                    android:text="Coffeeiphone1"/>
+                    android:text=""/>
 
             </android.support.design.widget.TextInputLayout>
 

@@ -10,7 +10,9 @@ public final class JSONRedditPost {
     public class RedditPostData {
         public String id; // Ex: 3t254u
         public String name; // Full name ex: t3_3t254u
+        public String subreddit; // Subreddit display name
         public String subreddit_id; // Full name of subreddit
+        public String GetSubredditTruncatedId() { return subreddit_id.split("_")[1]; } // Awful workaround to get the subreddits true id (sans the t#). Reddit returns the subreddit full name as 'subreddit_id'
         public String author;
         public String selftext;
         public String thumbnail;

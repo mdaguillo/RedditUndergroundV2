@@ -4,7 +4,7 @@ package com.mikedaguillo.redditunderground2.data.api.json;
  * Java representation of the json returned from the api call:
  * reddit.com/subreddits/mine/subscriber
  */
-public final class RedditSubreddits {
+public final class JSONRedditSubreddits {
     public String kind;
     public DataObject data;
 
@@ -20,6 +20,7 @@ public final class RedditSubreddits {
 
     public class SubredditDataObject {
         public String id;
+        public String name; // full name
         public String display_name;
         public String url;
     }

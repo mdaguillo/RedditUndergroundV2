@@ -22,7 +22,7 @@ import android.widget.Toast;
 import com.mikedaguillo.redditunderground2.data.database.RedditDatabaseHelper;
 import com.mikedaguillo.redditunderground2.utility.ApplicationManager;
 import com.mikedaguillo.redditunderground2.utility.ConnectionManager;
-import com.mikedaguillo.redditunderground2.data.api.json.RedditSubreddits;
+import com.mikedaguillo.redditunderground2.data.api.json.JSONRedditSubreddits;
 import com.mikedaguillo.redditunderground2.data.api.json.RedditLogin;
 
 import java.io.IOException;
@@ -222,7 +222,7 @@ public class LoginScreen extends AppCompatActivity {
                 editor.commit();
 
                 // Now lets try and retrieve the user's subreddits
-                RedditSubreddits subscribedSubreddits = ConnectionManager.GetCurrentUsersSubscribedSubreddits(redditReturnJSON.json.data.cookie);
+                JSONRedditSubreddits subscribedSubreddits = ConnectionManager.GetCurrentUsersSubscribedSubreddits(redditReturnJSON.json.data.cookie);
 
                 if (subscribedSubreddits == null)
                 {
@@ -243,10 +243,11 @@ public class LoginScreen extends AppCompatActivity {
                 // Loop through the returned data and insert into the db
                 for (int i = 0; i < subscribedSubreddits.data.children.length; i++)
                 {
-                    RedditSubreddits.SubredditDataObject subredditData = subscribedSubreddits.data.children[i].data;
+                    JSONRedditSubreddits.SubredditDataObject subredditData = subscribedSubreddits.data.children[i].data;
                     helper.InsertIgnoreSubredditRow(
                             db,
                             subredditData.id,
+                            subredditData.name,
                             subredditData.display_name,
                             subredditData.url,
                             mUsername

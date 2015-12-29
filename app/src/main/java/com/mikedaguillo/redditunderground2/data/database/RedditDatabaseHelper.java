@@ -122,7 +122,7 @@ public class RedditDatabaseHelper extends SQLiteOpenHelper {
     /**
      * Returns an array list of all of the subreddits that currently have associated posts stored in the db
      */
-    public ArrayList<String> GetCachedSubreddits(SQLiteDatabase database)
+    public ArrayList<String> GetCachedSubredditNames(SQLiteDatabase database)
     {
         Cursor cursor = null;
         try {
@@ -160,7 +160,7 @@ public class RedditDatabaseHelper extends SQLiteOpenHelper {
     /**
      * Returns a list of saved reddit post list items for a subreddit
      */
-    public ArrayList<RedditPostListItem> GetPostsForSubreddit(String subredditName) {
+    public ArrayList<RedditPostListItem> GetPostListItemsForSubreddit(String subredditName) {
         Cursor cursor = null;
         SQLiteDatabase database = null;
         try
@@ -232,7 +232,10 @@ public class RedditDatabaseHelper extends SQLiteOpenHelper {
             cursor.moveToFirst();
             RedditPost redditPost = new RedditPost(
                     cursor.getString(cursor.getColumnIndexOrThrow(RedditDatabaseContract.RedditPost.COLUMN_NAME_REDDITPOST_ID)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(RedditDatabaseContract.RedditPost.COLUMN_NAME_REDDITPOST_FULL_NAME)),
                     cursor.getString(cursor.getColumnIndexOrThrow(RedditDatabaseContract.RedditPost.COLUMN_NAME_SUBREDDIT_DISPLAY_NAME)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(RedditDatabaseContract.RedditPost.COLUMN_NAME_SUBREDDIT_ID)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(RedditDatabaseContract.RedditPost.COLUMN_NAME_SUBREDDIT_FULL_NAME)),
                     cursor.getString(cursor.getColumnIndexOrThrow(RedditDatabaseContract.RedditPost.COLUMN_NAME_AUTHOR)),
                     cursor.getString(cursor.getColumnIndexOrThrow(RedditDatabaseContract.RedditPost.COLUMN_NAME_TITLE)),
                     cursor.getInt(cursor.getColumnIndexOrThrow(RedditDatabaseContract.RedditPost.COLUMN_NAME_SCORE)),
