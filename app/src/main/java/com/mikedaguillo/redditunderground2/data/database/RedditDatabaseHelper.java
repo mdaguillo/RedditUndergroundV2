@@ -45,10 +45,11 @@ public class RedditDatabaseHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public long InsertIgnoreSubredditRow(SQLiteDatabase database, String subredditId, String subredditDisplayName, String subredditUrl, String subscribedUser)
+    public long InsertIgnoreSubredditRow(SQLiteDatabase database, String subredditId, String subredditFullName, String subredditDisplayName, String subredditUrl, String subscribedUser)
     {
         ContentValues values = new ContentValues();
         values.put(RedditDatabaseContract.Subreddit.COLUMN_NAME_SUBREDDIT_ID, subredditId);
+        values.put(RedditDatabaseContract.Subreddit.COLUMN_NAME_SUBREDDIT_FULL_NAME, subredditFullName);
         values.put(RedditDatabaseContract.Subreddit.COLUMN_NAME_DISPLAY_NAME, subredditDisplayName);
         values.put(RedditDatabaseContract.Subreddit.COLUMN_NAME_URL, subredditUrl);
         values.put(RedditDatabaseContract.Subreddit.COLUMN_NAME_SUBSCRIBED_USER, subscribedUser);
@@ -61,7 +62,10 @@ public class RedditDatabaseHelper extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
 
         values.put(RedditDatabaseContract.RedditPost.COLUMN_NAME_REDDITPOST_ID, (String) rowValues.get(RedditDatabaseContract.RedditPost.COLUMN_NAME_REDDITPOST_ID));
+        values.put(RedditDatabaseContract.RedditPost.COLUMN_NAME_REDDITPOST_FULL_NAME, (String) rowValues.get(RedditDatabaseContract.RedditPost.COLUMN_NAME_REDDITPOST_FULL_NAME));
         values.put(RedditDatabaseContract.RedditPost.COLUMN_NAME_SUBREDDIT_DISPLAY_NAME, (String) rowValues.get(RedditDatabaseContract.RedditPost.COLUMN_NAME_SUBREDDIT_DISPLAY_NAME));
+        values.put(RedditDatabaseContract.RedditPost.COLUMN_NAME_SUBREDDIT_ID, (String) rowValues.get(RedditDatabaseContract.RedditPost.COLUMN_NAME_SUBREDDIT_ID));
+        values.put(RedditDatabaseContract.RedditPost.COLUMN_NAME_SUBREDDIT_FULL_NAME, (String) rowValues.get(RedditDatabaseContract.RedditPost.COLUMN_NAME_SUBREDDIT_FULL_NAME));
         values.put(RedditDatabaseContract.RedditPost.COLUMN_NAME_AUTHOR, (String) rowValues.get(RedditDatabaseContract.RedditPost.COLUMN_NAME_AUTHOR));
         values.put(RedditDatabaseContract.RedditPost.COLUMN_NAME_TITLE, (String) rowValues.get(RedditDatabaseContract.RedditPost.COLUMN_NAME_TITLE));
         values.put(RedditDatabaseContract.RedditPost.COLUMN_NAME_SCORE, (int) rowValues.get(RedditDatabaseContract.RedditPost.COLUMN_NAME_SCORE));

@@ -9,6 +9,8 @@ public final class JSONRedditPost {
 
     public class RedditPostData {
         public String id; // Ex: 3t254u
+        public String name; // Full name ex: t3_3t254u
+        public String subreddit_id; // Full name of subreddit
         public String author;
         public String selftext;
         public String thumbnail;

@@ -193,12 +193,12 @@ public final class ConnectionManager {
         return (network == NetworkInfo.State.CONNECTED);
     }
 
-    public static RedditListing CacheSubreddit(String subredditToCache, String sessionCookie) throws IOException {
+    public static RedditListing RetrievePostListing(String subreddit, String sessionCookie) throws IOException {
         InputStream inputStream;
         try
         {
             // Get connection string
-            String connectionString = RedditAPI.REDDIT_SUBREDDIT_LISTING_HOT.replace("{subreddit}", subredditToCache);
+            String connectionString = RedditAPI.REDDIT_SUBREDDIT_LISTING_HOT.replace("{subreddit}", subreddit);
             URL connectionUrl = new URL(connectionString);
             HttpsURLConnection connection = (HttpsURLConnection) connectionUrl.openConnection();
             connection.setReadTimeout(10000);
@@ -214,7 +214,7 @@ public final class ConnectionManager {
             String returnValues = ReadInputStream(inputStream);
             if (returnValues == null)
             {
-                Log.e(TAG, "Error occurred while attempting to read input stream for subreddit: " + subredditToCache);
+                Log.e(TAG, "Error occurred while attempting to read input stream for subreddit: " + subreddit);
                 return null;
             }
 

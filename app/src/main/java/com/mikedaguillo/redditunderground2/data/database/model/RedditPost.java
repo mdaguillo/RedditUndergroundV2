@@ -4,9 +4,12 @@ package com.mikedaguillo.redditunderground2.data.database.model;
  * Object representation of a reddit post in the database
  */
 public class RedditPost {
-    public RedditPost(String PostId, String SubredditDisplayName, String Author, String Title, int Score, float Created, String SelfText, String Url, String ThumbnailLocation, int NumComments, int isOver18, int isStickied, int isSelf)
+    public RedditPost(String PostId, String PostFullName, String SubredditDisplayName, String SubredditId, String SubredditFullName, String Author, String Title, int Score, float Created, String SelfText, String Url, String ThumbnailLocation, int NumComments, int isOver18, int isStickied, int isSelf)
     {
         this.PostId = PostId;
+        this.PostFullName = PostFullName;
+        this.SubredditId = SubredditId;
+        this.SubredditFullName = SubredditFullName;
         this.SubredditDisplayName = SubredditDisplayName;
         this.Author = Author;
         this.Title = Title;
@@ -23,6 +26,15 @@ public class RedditPost {
 
     private String PostId;
     public String GetPostId() { return PostId; }
+
+    private String PostFullName;
+    public String GetPostFullName() { return PostFullName; }
+
+    private String SubredditId;
+    public String GetSubredditId() { return SubredditId; }
+
+    private String SubredditFullName;
+    public String GetSubredditFullName() { return SubredditFullName; }
 
     private String SubredditDisplayName;
     public String GetSubredditDisplayName() { return SubredditDisplayName; }

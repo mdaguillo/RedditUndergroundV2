@@ -174,7 +174,7 @@ public class DownloadSubredditsScreen extends AppCompatActivity {
                     progressUpdates.UpdatePercent = 0;
                     publishProgress(progressUpdates);
 
-                    RedditListing listing = ConnectionManager.CacheSubreddit(subreddit, _sessionCookie);
+                    RedditListing listing = ConnectionManager.RetrievePostListing(subreddit, _sessionCookie);
                     if (listing == null || listing.data == null || listing.data.children == null)
                     {
                         Log.e(TAG, "An error occurred while attempting to retrieve listing data from subreddit: " + subreddit + ". Listing or data returned null.");
