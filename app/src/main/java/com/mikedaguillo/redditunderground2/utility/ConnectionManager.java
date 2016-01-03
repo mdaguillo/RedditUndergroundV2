@@ -7,7 +7,10 @@ import android.net.NetworkInfo;
 import android.util.Log;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import com.mikedaguillo.redditunderground2.data.api.*;
+import com.mikedaguillo.redditunderground2.data.api.json.JSONRedditCommentListing;
 import com.mikedaguillo.redditunderground2.data.api.json.RedditListing;
 import com.mikedaguillo.redditunderground2.data.api.json.RedditLogin;
 import com.mikedaguillo.redditunderground2.data.api.json.JSONRedditSubreddits;
@@ -213,7 +216,7 @@ public final class ConnectionManager {
             String returnValues = ReadInputStream(inputStream);
             if (returnValues == null)
             {
-                Log.e(TAG, "Error occurred while attempting to read input stream for subreddit: " + subreddit);
+                Log.e(TAG, "No return values retrieved while reading input stream for subreddit: " + subreddit);
                 return null;
             }
 
@@ -227,6 +230,56 @@ public final class ConnectionManager {
         catch (IOException ex)
         {
             Log.e(TAG, "Error making connection to listing", ex);
+            return null;
+        }
+    }
+
+    public static JSONRedditCommentListing GetCommentsForPost(String subreddit, String postId, String sessionCookie) throws IOException
+    {
+        InputStream inputStream;
+        try
+        {
+            // Get connection string
+            // TODO replace the depth and comment limit with user settings
+            String connectionString = RedditAPI.REDDIT_GET_COMMENTS_FOR_POST
+                    .replace("{subreddit}", subreddit)
+                    .replace("{postid}", postId)
+                    .replace("{depthlimit}", "5")
+                    .replace("{commentlimit}", "50");
+
+            URL connectionUrl = new URL(connectionString);
+            HttpsURLConnection connection = (HttpsURLConnection) connectionUrl.openConnection();
+            connection.setReadTimeout(10000);
+            connection.setConnectTimeout(15000);
+            connection.setRequestMethod("GET");
+            connection.setRequestProperty("Cookie", "reddit_session=" + sessionCookie + "; secure_session=1");
+
+            connection.connect();
+
+            inputStream = connection.getInputStream();
+            String returnValues = ReadInputStream(inputStream);
+            if (returnValues == null)
+            {
+                Log.e(TAG, "No return values retrieved while attempting to get comment listing for postid: " + postId);
+                return null;
+            }
+            JsonParser parser = new JsonParser();
+            JsonElement returnElement = parser.parse(returnValues);
+            JsonElement listingElement = returnElement.getAsJsonArray().get(1); // get the comments
+            String listingString = listingElement.toString();
+
+            // Reddit is dumb and the lowest level of a tree will have an object "replies" that they return as a empty string instead of an empty object
+            // This is kind of hacky, but lets Gson cleanly parse the listing element into our java representations
+            listingString = listingString.replace("\"replies\":\"\"", "\"replies\":{}");
+
+            Log.d(TAG, "Comment listing return values: " + listingString);
+            Gson gson = new Gson();
+            JSONRedditCommentListing listing = gson.fromJson(listingString, JSONRedditCommentListing.class);
+            return listing;
+        }
+        catch (IOException ex)
+        {
+            Log.e(TAG, "Error occurred while attempting to retrieve commments for post with postid: " + postId, ex);
             return null;
         }
     }

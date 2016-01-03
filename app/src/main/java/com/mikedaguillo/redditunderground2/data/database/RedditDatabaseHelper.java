@@ -36,12 +36,14 @@ public class RedditDatabaseHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(RedditDatabaseContract.SQL_CREATE_TABLE_SUBREDDIT);
         db.execSQL(RedditDatabaseContract.SQL_CREATE_TABLE_REDDITPOST);
+        db.execSQL(RedditDatabaseContract.SQL_CREATE_TABLE_REDDITCOMMENT);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL(RedditDatabaseContract.SQL_DELETE_TABLE_SUBREDDIT);
         db.execSQL(RedditDatabaseContract.SQL_DELETE_TABLE_REDDITPOST);
+        db.execSQL(RedditDatabaseContract.SQL_DELETE_TABLE_REDDITCOMMENT);
         onCreate(db);
     }
 

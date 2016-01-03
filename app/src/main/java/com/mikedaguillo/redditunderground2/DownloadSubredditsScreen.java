@@ -17,6 +17,7 @@ import android.widget.CheckedTextView;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.mikedaguillo.redditunderground2.data.api.json.JSONRedditCommentListing;
 import com.mikedaguillo.redditunderground2.data.api.json.JSONRedditPost;
 import com.mikedaguillo.redditunderground2.data.database.RedditDatabaseContract;
 import com.mikedaguillo.redditunderground2.data.database.RedditDatabaseHelper;
@@ -222,6 +223,9 @@ public class DownloadSubredditsScreen extends AppCompatActivity {
 
                             long success = dbHelper.InsertIgnoreRedditPostRow(db, redditPostValues);
                             Log.d(TAG, "Post row number: " + success);
+
+                            // Now we need to make a request to get the comments for this particular post
+                            JSONRedditCommentListing commentData = ConnectionManager.GetCommentsForPost(post.data.subreddit, post.data.id, _sessionCookie);
                         }
                         else
                         {

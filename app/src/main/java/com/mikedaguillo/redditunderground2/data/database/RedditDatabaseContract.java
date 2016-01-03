@@ -61,6 +61,28 @@ public final class RedditDatabaseContract {
     public static final String SQL_DELETE_TABLE_REDDITPOST =
             "DROP TABLE IF EXISTS " + RedditPost.TABLE_NAME + ";";
 
+    // Comment Table
+    public static final String SQL_CREATE_TABLE_REDDITCOMMENT =
+            "CREATE TABLE " + RedditComment.TABLE_NAME + " ("
+            + RedditComment._ID + INTEGER_TYPE + " PRIMARY KEY,"
+            + RedditComment.COLUMN_NAME_REDDITCOMMENT_ID + TEXT_TYPE + COMMA_SEP
+            + RedditComment.COLUMN_NAME_REDDITCOMMENT_FULLNAME + TEXT_TYPE + COMMA_SEP
+            + RedditComment.COLUMN_NAME_REDDITPOST_FULLNAME + TEXT_TYPE + COMMA_SEP
+            + RedditComment.COLUMN_NAME_REDDITCOMMENT_PARENT_ID + TEXT_TYPE + COMMA_SEP
+            + RedditComment.COLUMN_NAME_REDDITCOMMENT_AUTHOR + TEXT_TYPE + COMMA_SEP
+            + RedditComment.COLUMN_NAME_REDDITCOMMENT_BODY + TEXT_TYPE + COMMA_SEP
+            + RedditComment.COLUMN_NAME_REDDITCOMMENT_UPS + INTEGER_TYPE + COMMA_SEP
+            + RedditComment.COLUMN_NAME_REDDITCOMMENT_DOWNS + INTEGER_TYPE + COMMA_SEP
+            + RedditComment.COLUMN_NAME_REDDITCOMMENT_SCORE + INTEGER_TYPE + COMMA_SEP
+            + RedditComment.COLUMN_NAME_REDDITCOMMENT_CREATED + REAL_TYPE + COMMA_SEP
+            + RedditComment.COLUMN_NAME_REDDITCOMMENT_GILDED + INTEGER_TYPE + COMMA_SEP
+            + UNIQUE + "(" + RedditComment.COLUMN_NAME_REDDITCOMMENT_ID + ")"
+            + FOREIGN_KEY + "(" + RedditComment.COLUMN_NAME_REDDITPOST_FULLNAME + ")" + REFERENCES + RedditPost.TABLE_NAME + "(" + RedditPost.COLUMN_NAME_REDDITPOST_FULL_NAME + ")"
+            + " )";
+
+    public static final String SQL_DELETE_TABLE_REDDITCOMMENT =
+            "DROP TABLE IF EXISTS " + RedditComment.TABLE_NAME + ";";
+
     // Inner class defines table contents
     public static abstract class Subreddit implements BaseColumns
     {
@@ -91,5 +113,21 @@ public final class RedditDatabaseContract {
         public static final String COLUMN_NAME_IS_OVER_18 = "is_over_18";
         public static final String COLUMN_NAME_IS_STICKIED = "is_stickied";
         public static final String COLUMN_NAME_IS_SELF = "is_self";
+    }
+
+    public static abstract class RedditComment implements BaseColumns
+    {
+        public static final String TABLE_NAME = "redditcomment";
+        public static final String COLUMN_NAME_REDDITCOMMENT_ID = "redditcomment_id";
+        public static final String COLUMN_NAME_REDDITCOMMENT_FULLNAME = "redditcomment_full_name";
+        public static final String COLUMN_NAME_REDDITPOST_FULLNAME = "redditpost_full_name";
+        public static final String COLUMN_NAME_REDDITCOMMENT_PARENT_ID = "parent_id";
+        public static final String COLUMN_NAME_REDDITCOMMENT_AUTHOR = "author";
+        public static final String COLUMN_NAME_REDDITCOMMENT_BODY = "body";
+        public static final String COLUMN_NAME_REDDITCOMMENT_UPS = "ups";
+        public static final String COLUMN_NAME_REDDITCOMMENT_DOWNS = "downs";
+        public static final String COLUMN_NAME_REDDITCOMMENT_SCORE = "score";
+        public static final String COLUMN_NAME_REDDITCOMMENT_CREATED = "created";
+        public static final String COLUMN_NAME_REDDITCOMMENT_GILDED = "gilded";
     }
 }
